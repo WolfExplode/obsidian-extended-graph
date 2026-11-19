@@ -127,6 +127,11 @@ export default class ExtendedGraphPlugin extends Plugin {
     // =============================== UNLOADING ===============================
 
     onunload() {
+        const manager = ExtendedGraphInstances.graphsManager;
+        if (!manager) return;
+        for (const leafID of manager.allInstances.keys()) {
+            manager.lifecycleManager.disablePluginFromLeafID(leafID);
+        }
     }
 
     // ================================ SETTINGS ===============================

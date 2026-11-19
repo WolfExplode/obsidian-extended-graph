@@ -1,6 +1,6 @@
 
 import { Component } from 'obsidian';
-import { FOLDER_KEY, FoldersSet, GraphInstances, InteractiveManager, LayersManager, LayersUI, LINK_KEY, LinksSet, NodesSet, TAG_KEY } from '../internal';
+import { ExtendedGraphInstances, FOLDER_KEY, FoldersSet, GraphInstances, InteractiveManager, LayersManager, LayersUI, LINK_KEY, LinksSet, NodesSet, TAG_KEY } from '../internal';
 
 export class Graph extends Component {
     instances: GraphInstances;
@@ -80,6 +80,7 @@ export class Graph extends Component {
 
     onload(): void {
         this.initSets().then(() => {
+            if (ExtendedGraphInstances.graphsManager.allInstances.get(this.instances.view.leaf.id) !== this.instances) return;
             this.instances.graphEventsDispatcher.onGraphReady();
         }).catch(e => {
             console.error(e);

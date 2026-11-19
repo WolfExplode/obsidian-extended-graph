@@ -1,6 +1,7 @@
 import { Component, ExtraButtonComponent, setIcon } from "obsidian";
 import { GraphView, LocalGraphView } from "obsidian-typings";
-import { ExtendedGraphInstances, t } from "../internal";
+import { ExtendedGraphInstances, getEngine, t } from "../internal";
+import { GraphSearch } from "./graphSearch";
 
 export class MenuUI extends Component {
     view: GraphView | LocalGraphView;
@@ -8,11 +9,14 @@ export class MenuUI extends Component {
     graphControlsEl: HTMLDivElement;
     buttonEnable: ExtraButtonComponent;
     buttonReset: ExtraButtonComponent;
+    private search: GraphSearch;
     enabled: boolean;
 
     constructor(view: GraphView | LocalGraphView) {
         super();
         this.view = view;
+        const nativeFilter = getEngine(view)?.filterOptions.search;
+        if (!nativeFilter) throw new Error("Graph filter is unavailable");
         this.graphControlsEl = this.view.contentEl.querySelector(".graph-controls") as HTMLDivElement;
         this.graphControlsEl.addClass("graph-controls-extended-graph");
 
@@ -20,6 +24,17 @@ export class MenuUI extends Component {
         hr.addClass("separator-exended-graph");
         this.createEnableButton();
         this.createResetButton();
+        this.search = this.addChild(new GraphSearch(view, nativeFilter));
+        this.register(() => {
+            this.buttonEnable.extraSettingsEl.remove();
+            this.buttonReset.extraSettingsEl.remove();
+            hr.remove();
+            this.graphControlsEl.removeClass("graph-controls-extended-graph");
+        });
+    }
+
+    focusSearch() {
+        this.search.focus("find");
     }
 
     createEnableButton() {
@@ -59,6 +74,7 @@ export class MenuUI extends Component {
         this.buttonEnable.extraSettingsEl.addClass("is-active");
         this.buttonEnable.setTooltip(`${t("controls.disable")} ${t("plugin.name")}`, { placement: 'top' });
         this.graphControlsEl.insertAfter(this.buttonReset.extraSettingsEl, this.buttonEnable.extraSettingsEl);
+        this.search.setActive(true);
     }
 
     setDisableUIState() {
@@ -66,15 +82,18 @@ export class MenuUI extends Component {
         this.buttonEnable.extraSettingsEl.removeClass("is-active");
         this.buttonEnable.setTooltip(`${t("controls.enable")} ${t("plugin.name")}`, { placement: 'top' });
         this.buttonReset.extraSettingsEl.remove();
+        this.search.setActive(false);
     }
 
     enableUI() {
         this.buttonEnable.setDisabled(false);
         this.buttonReset.setDisabled(false);
+        this.search.setDisabled(false);
     }
 
     disableUI() {
         this.buttonEnable.setDisabled(true);
         this.buttonReset.setDisabled(true);
+        this.search.setDisabled(true);
     }
 }

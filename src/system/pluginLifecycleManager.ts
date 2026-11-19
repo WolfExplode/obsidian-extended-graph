@@ -25,6 +25,7 @@ export class PluginLifecycleManager extends Component {
 
         const actuallyEnablePlugin = async () => {
             const instances = await this.addGraph(view, stateID ?? ExtendedGraphInstances.settings.startingStateID, reloadState);
+            if (ExtendedGraphInstances.graphsManager.allInstances.get(view.leaf.id) !== instances) return;
 
             ExtendedGraphInstances.graphsManager.vaultStatsManager.initializeCalculators(instances);
 
@@ -106,7 +107,7 @@ export class PluginLifecycleManager extends Component {
     private unloadDispatcher(leafID: string) {
         const instances = ExtendedGraphInstances.graphsManager.allInstances.get(leafID);
         if (instances) {
-            instances.graphEventsDispatcher.unload();
+            instances.view.removeChild(instances.graphEventsDispatcher);
         }
         else {
             ExtendedGraphInstances.graphsManager.graphLeavesManager.enableUI(leafID);

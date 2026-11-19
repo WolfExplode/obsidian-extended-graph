@@ -19,6 +19,16 @@ export function addCommands(plugin: ExtendedGraphPlugin) {
     addPinCommands(plugin);
     addSelectCommands(plugin);
     addFocusCommands(plugin);
+    plugin.addCommand({
+        id: "find-note-in-graph",
+        name: t("controls.findNoteInGraph"),
+        checkCallback: checking => {
+            const view = getActiveGraphView(plugin);
+            if (!view || !ExtendedGraphInstances.graphsManager.allInstances.has(view.leaf.id)) return false;
+            if (!checking) ExtendedGraphInstances.graphsManager.graphLeavesManager.globalUIs.get(view.leaf.id)?.menu.focusSearch();
+            return true;
+        }
+    });
 }
 
 function addEnableCommands(plugin: ExtendedGraphPlugin) {

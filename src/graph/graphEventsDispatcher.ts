@@ -544,7 +544,7 @@ export class GraphEventsDispatcher extends Component {
         ExtendedGraphInstances.proxysManager.unregisterProxy(this.instances.renderer.destroyGraphics);
         ExtendedGraphInstances.proxysManager.unregisterProxy(this.instances.renderer.initGraphics);
         this.instances.foldersUI?.destroy();
-        this.inputsManager.unload();
+        this.inputsManager?.unload();
         ExtendedGraphInstances.graphsManager.lifecycleManager.onPluginUnloaded(this.instances.view);
         this.restoreArrowAlpha();
         this.restoreLineHighlight();
@@ -576,7 +576,7 @@ export class GraphEventsDispatcher extends Component {
 
         const checkboxes = this.instances.view.contentEl.querySelectorAll('.graph-control-section.mod-filter .checkbox-container');
         for (const checkboxContainer of Array.from(checkboxes)) {
-            checkboxContainer.addEventListener('mousedown', this.updateLastCheckboxToggled);
+            checkboxContainer.removeEventListener('mousedown', this.updateLastCheckboxToggled);
         }
 
         ExtendedGraphInstances.proxysManager.unregisterProxy(this.instances.engine.options);
@@ -826,7 +826,7 @@ export class GraphEventsDispatcher extends Component {
             case 'core-search':
                 this.instances.engine.filterOptions.search.inputEl.blur();
                 this.lastFilteringAction.searchNew = this.lastFilteringAction.searchOld;
-                this.instances.engine.filterOptions.search.inputEl.value = this.lastFilteringAction.searchOld;
+                this.instances.engine.filterOptions.search.setValue(this.lastFilteringAction.searchOld);
                 this.instances.engine.updateSearch();
                 break;
             case 'core-tags':

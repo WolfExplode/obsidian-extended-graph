@@ -17,6 +17,24 @@
         "target": "Cible",
         "valuePlaceholder": "valeur..."
     },
+    "graphSearch": {
+        "filterPlaceholder": "Filtrer par texte ou requête…",
+        "queryHint": "Utilisez du texte ou les opérateurs Obsidian file:, path:, tag: et content:",
+        "findPlaceholder": "Rechercher une note visible par nom ou chemin…",
+        "findShortcut": "Rechercher une note dans le graphe (Ctrl/⌘+F)",
+        "tags": "Tags",
+        "clearQuery": "Effacer le texte de recherche",
+        "clearFilters": "Tout effacer",
+        "activeFilters": "Filtres actifs du graphe",
+        "removeFilter": "Retirer le filtre {{value}}",
+        "facetRule": "Au moins un choix ici. Se combine avec les autres filtres.",
+        "searchFacet": "Rechercher dans les {{facet}}…",
+        "noChoices": "Aucun résultat",
+        "moreChoices": "{{count}} résultats. Saisissez du texte pour affiner la liste.",
+        "vaultNoteCount": "Notes dans le coffre",
+        "visibleNotes": "Notes visibles correspondantes",
+        "moreNotes": "30 premiers résultats. Saisissez du texte pour affiner la liste."
+    },
     "beta": {
         "beta": "Bêta",
         "betaFeatures": "Fonctionnalités en bêta",
@@ -26,6 +44,11 @@
         "revertActionDesc": "Si le nombre maximal de noeus est atteind, le module tentera d'annuler la dernière action au lieu de désactiver le module"
     },
     "controls": {
+        "findNoteInGraph": "Rechercher une note dans le graphe",
+        "findGraphNote": "Rechercher",
+        "filterGraph": "Filtrer le graphe",
+        "graphSearchMode": "Mode de recherche du graphe",
+        "noNotesInGraph": "Aucune note correspondante dans ce graphe",
         "add": "Ajouter",
         "apply": "Appliquer",
         "back": "Retour",

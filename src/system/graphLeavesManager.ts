@@ -13,6 +13,7 @@ export class GraphLeavesManager extends Component {
         let globalUI = this.globalUIs.get(view.leaf.id);
 
         if (globalUI && globalUI.menu.view === view && globalUI.control.view === view) return globalUI;
+        this.removeGlobalUI(view.leaf.id);
 
         const menuUI = new MenuUI(view);
         view.addChild(menuUI);
@@ -24,6 +25,20 @@ export class GraphLeavesManager extends Component {
         globalUI = { menu: menuUI, control: controlsUI };
         this.globalUIs.set(view.leaf.id, globalUI);
         return globalUI;
+    }
+
+    removeGlobalUI(leafID: string): void {
+        const globalUI = this.globalUIs.get(leafID);
+        if (!globalUI) return;
+        this.globalUIs.delete(leafID);
+        globalUI.menu.view.removeChild(globalUI.menu);
+        globalUI.control.view.removeChild(globalUI.control);
+    }
+
+    override onunload(): void {
+        for (const leafID of this.globalUIs.keys()) {
+            this.removeGlobalUI(leafID);
+        }
     }
 
     disableUI(leafID: string) {

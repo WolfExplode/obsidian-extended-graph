@@ -17,6 +17,24 @@
         "target": "Target",
         "valuePlaceholder": "value..."
     },
+    "graphSearch": {
+        "filterPlaceholder": "Filter notes by text or query…",
+        "queryHint": "Use plain text or Obsidian operators such as file:, path:, tag:, and content:",
+        "findPlaceholder": "Find a visible note by name or path…",
+        "findShortcut": "Find note in graph (Ctrl/⌘+F)",
+        "tags": "Tags",
+        "clearQuery": "Clear search text",
+        "clearFilters": "Clear all",
+        "activeFilters": "Active graph filters",
+        "removeFilter": "Remove filter {{value}}",
+        "facetRule": "Match any here. Combine with other filters.",
+        "searchFacet": "Search {{facet}}…",
+        "noChoices": "No matches",
+        "moreChoices": "{{count}} matches. Type to narrow the list.",
+        "vaultNoteCount": "Notes in the vault",
+        "visibleNotes": "Matching visible notes",
+        "moreNotes": "Showing the first 30 matches. Type to narrow the list."
+    },
     "beta": {
         "beta": "Beta",
         "betaFeatures": "Beta features",
@@ -26,6 +44,11 @@
         "revertActionDesc": "If the max number of nodes is reached, try to reverse last action instead of disabling the plugin"
     },
     "controls": {
+        "findNoteInGraph": "Find note in graph",
+        "findGraphNote": "Find",
+        "filterGraph": "Filter graph",
+        "graphSearchMode": "Graph search mode",
+        "noNotesInGraph": "No matching notes in this graph view",
         "add": "Add",
         "apply": "Apply",
         "back": "Back",

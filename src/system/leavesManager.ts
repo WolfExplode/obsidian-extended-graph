@@ -33,7 +33,7 @@ export class LeavesManager extends Component {
         const globalUIsIDs = [...ExtendedGraphInstances.graphsManager.graphLeavesManager.globalUIs.keys()];
         for (const leafID of globalUIsIDs) {
             if (!currentActiveLeavesID.includes(leafID)) {
-                ExtendedGraphInstances.graphsManager.graphLeavesManager.globalUIs.delete(leafID);
+                ExtendedGraphInstances.graphsManager.graphLeavesManager.removeGlobalUI(leafID);
             }
         }
 
