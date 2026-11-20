@@ -1,0 +1,31 @@
+/*
+ * ExtendedGraph_advancedCC — badge at the top of the plugin settings:
+ * version, session log path, compact mode switch and hidden-groups counter.
+ */
+import { ToggleComponent } from "obsidian";
+import { CCLogger, CC_VERSION } from "./ccLogger";
+import type { EGSettingsView } from "./ccTypes";
+import { CCCompact } from "./ccCompact";
+import { CCSettings } from "./ccSettings";
+
+export function addCCVersionBadge(container: HTMLElement, settings?: EGSettingsView): void {
+    const badge = container.createDiv({ cls: "graphview-cc-badge" });
+
+    const top = badge.createDiv({ cls: "graphview-cc-badge-row" });
+    const title = top.createDiv();
+    title.createSpan({ cls: "graphview-cc-badge-version", text: `ExtendedGraph_advancedCC v${CC_VERSION}` });
+    title.createSpan({ cls: "graphview-cc-badge-base", text: "based on Extended Graph 2.7.6" });
+
+    const sw = top.createDiv({ cls: "graphview-cc-compact-switch" });
+    sw.createSpan({ text: "Compact mode" });
+    new ToggleComponent(sw)
+        .setValue(CCSettings.data.compactMode)
+        .setTooltip("On: show only pinned groups. Off: show everything.")
+        .onChange(v => void CCCompact.setCompact(v));
+
+    const counter = badge.createDiv({ cls: "graphview-cc-badge-counter" });
+    const file = CCLogger.logFile;
+    if (file) badge.createDiv({ cls: "graphview-cc-badge-log", text: `Debug log: ${file}` });
+
+    CCCompact.begin(container, settings, counter);
+}

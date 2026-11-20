@@ -8,6 +8,7 @@ import {
     TAG_KEY
 } from "../internal";
 
+import { CCNodeFactor } from "../cc/ccNodeFactor"; // [CC]
 export class GraphState {
     data = new GraphStateData();
 
@@ -55,6 +56,8 @@ export class GraphState {
             this.data.enableLayers = instances.layersManager.isEnabled;
             this.data.currentLayerLevel = instances.layersManager.currentLevel;
         }
+
+        this.data.ccNodeFactor = CCNodeFactor.snapshot(); // [CC]
     }
 
     saveState(stateData: GraphStateData): boolean {
@@ -63,7 +66,7 @@ export class GraphState {
     }
 
     isValidProperty(key: string) {
-        return ['id', 'name', 'toggleTypes', 'logicTypes', 'pinNodes', 'engineOptions', 'hiddenLegendRows', 'collapsedLegendRows', 'enableLayers', 'currentLayerLevel'].includes(key);
+        return ['id', 'name', 'toggleTypes', 'logicTypes', 'pinNodes', 'engineOptions', 'hiddenLegendRows', 'collapsedLegendRows', 'enableLayers', 'currentLayerLevel', 'ccNodeFactor'].includes(key); // [CC] ccNodeFactor
     }
 
     private completeDefaultOptions(): boolean {

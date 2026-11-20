@@ -23,11 +23,21 @@ import {
 
 // https://pixijs.download/v7.4.2/docs/index.html
 
+import { CCLogger } from "./cc/ccLogger"; // [CC]
+import { addCCCommands } from "./cc/ccCommands"; // [CC]
+import { CCSettings } from "./cc/ccSettings"; // [CC]
+import { CCNodeFactor } from "./cc/ccNodeFactor"; // [CC]
+import { CCNodeFactorSection, registerNodeFactorEvents } from "./cc/ccNodeFactorUI"; // [CC]
+import { CCOptionCC, CCOptionCCSection, registerOptionCCEvents } from "./cc/ccOptionCC"; // [CC]
+import { CCFilterRows } from "./cc/ccFilterRows"; // [CC]
+
 export default class ExtendedGraphPlugin extends Plugin {
 
     // ================================ LOADING ================================
 
     async onload(): Promise<void> {
+        CCLogger.init(this); // [CC]
+        CCLogger.log("INIT", "onload start"); // [CC]
         await this.checkDataValidity();
 
         ExtendedGraphInstances.plugin = this;
@@ -35,6 +45,12 @@ export default class ExtendedGraphPlugin extends Plugin {
         ExtendedGraphInstances.configurationDirectory = normalizePath(this.manifest.dir + "/configs/");
         ExtendedGraphInstances.proxysManager = new ProxysManager();
         await this.loadSettings();
+        CCLogger.logSettings(ExtendedGraphInstances.settings); // [CC]
+        await CCSettings.load(this); // [CC]
+        CCNodeFactor.init(this.app, CCSettings.data.nodeFactor); // [CC]
+        registerNodeFactorEvents(this); // [CC]
+        CCOptionCC.init(this.app, CCSettings.data.optionCC); // [CC]
+        registerOptionCCEvents(this); // [CC]
 
         this.addIcons();
 
@@ -63,6 +79,8 @@ export default class ExtendedGraphPlugin extends Plugin {
         );
 
         addCommands(this);
+        addCCCommands(this); // [CC]
+        CCLogger.log("INIT", "onload done"); // [CC]
     }
 
     private addIcons(): void {
@@ -128,10 +146,15 @@ export default class ExtendedGraphPlugin extends Plugin {
 
     onunload() {
         const manager = ExtendedGraphInstances.graphsManager;
-        if (!manager) return;
-        for (const leafID of manager.allInstances.keys()) {
-            manager.lifecycleManager.disablePluginFromLeafID(leafID);
+        if (manager) {
+            for (const leafID of manager.allInstances.keys()) {
+                manager.lifecycleManager.disablePluginFromLeafID(leafID);
+            }
         }
+        CCNodeFactorSection.removeAll(); // [CC]
+        CCOptionCCSection.removeAll(); // [CC]
+        CCFilterRows.disableAll(); // [CC] restore the native search engine
+        CCLogger.close(); // [CC]
     }
 
     // ================================ SETTINGS ===============================

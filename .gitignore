@@ -1,5 +1,5 @@
 # vscode
-.vscode 
+.vscode
 
 # Intellij
 *.iml
@@ -35,3 +35,9 @@ download-stats.py
 releases.csv
 data with group.json
 benchmarks/
+
+# ExtendedGraph_advancedCC: local settings, debug logs, dev tools
+cc-settings.json
+logs/
+*.log
+.hotreload

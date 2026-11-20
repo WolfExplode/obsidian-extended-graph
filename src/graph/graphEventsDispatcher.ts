@@ -61,6 +61,7 @@ interface LastFilteringAction {
     userChange: boolean;
 }
 
+import { CCOptionCC } from "../cc/ccOptionCC"; // [CC]
 export class GraphEventsDispatcher extends Component {
     instances: GraphInstances;
     inputsManager: InputsManager;
@@ -686,7 +687,9 @@ export class GraphEventsDispatcher extends Component {
 
     private updateData(data: GraphData): GraphData | undefined {
         // Filter out nodes
-        data = this.instances.radialLayout.filter(this.instances.filter.filterData(data));
+        data = this.instances.filter.filterData(data);
+        data = CCOptionCC.filter(this.instances.type, data); // [CC] depth / incoming / outgoing / neighbor on the global graph
+        data = this.instances.radialLayout.filter(data);
         ExtendedGraphInstances.graphsManager.updateStatusBarItem(this.instances.view.leaf, Object.keys(data.nodes).length);
 
         // Disable extended links

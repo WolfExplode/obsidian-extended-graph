@@ -2,6 +2,13 @@ import { Component } from "obsidian";
 import { GraphView, LocalGraphView } from "obsidian-typings";
 import { GCOptions, GraphInstances } from "../../internal";
 import { GCRadialLayout } from "./GCRadialLayout";
+import { CCNodeFactorSection } from "../../cc/ccNodeFactorUI"; // [CC]
+import { setupExtendedGraphSection } from "../../cc/ccExtendedGraphPanel"; // [CC]
+import { HeaderToggle } from "../../cc/ccPanel"; // [CC]
+import { CCOptionCCSection } from "../../cc/ccOptionCC"; // [CC]
+import { CCFilterRows } from "../../cc/ccFilterRows"; // [CC]
+import type { SearchEngineLike } from "../../cc/ccTypes"; // [CC]
+import { applyPanelLayout, CCOptionsSection } from "../../cc/ccPanelLayout"; // [CC]
 
 export class GraphControlsUI extends Component {
     instances: GraphInstances | null;
@@ -12,6 +19,10 @@ export class GraphControlsUI extends Component {
     // Sections
     sectionSettings: GCOptions;
     sectionLayout: GCRadialLayout;
+    ccNodeFactor: CCNodeFactorSection; // [CC]
+    ccEGToggle: HeaderToggle; // [CC]
+    ccOptionCC?: CCOptionCCSection; // [CC] global graph only
+    ccFilterRows: CCFilterRows; // [CC] "+ Add query" under Filters search
 
     constructor(view: GraphView | LocalGraphView) {
         super();
@@ -20,16 +31,33 @@ export class GraphControlsUI extends Component {
         this.sectionLayout = this.addChild(new GCRadialLayout(view));
         this.sectionSettings = new GCOptions(view);
         this.addChild(this.sectionSettings);
+        this.ccEGToggle = setupExtendedGraphSection(view, this.sectionSettings.root); // [CC] rename + title switch
+        this.ccFilterRows = new CCFilterRows(view); // [CC]
+        this.addChild(new CCOptionsSection(view)); // [CC] empty "Options", last
+        applyPanelLayout(view); // [CC] names, Display+Forces merge, order
+        this.ccNodeFactor = new CCNodeFactorSection(view); // [CC]
+        this.addChild(this.ccNodeFactor); // [CC]
+        if (view.getViewType() === "graph") { this.ccOptionCC = new CCOptionCCSection(view); this.addChild(this.ccOptionCC); } // [CC]
     }
 
     onPluginEnabled(instances: GraphInstances): void {
         this.instances = instances;
         this.sectionLayout.onPluginEnabled(instances);
         this.sectionSettings.onPluginEnabled(instances);
+        this.ccNodeFactor.onPluginEnabled(); // [CC]
+        this.ccEGToggle.set(true); // [CC]
+        this.ccOptionCC?.onPluginEnabled(); // [CC]
+        this.ccFilterRows.enable(instances.engine as unknown as SearchEngineLike); // [CC]
+        window.setTimeout(() => applyPanelLayout(this.view), 0); // [CC] sections added on enable (folders…)
     }
 
     onPluginDisabled(): void {
         this.sectionLayout.onPluginDisabled();
         this.sectionSettings.onPluginDisabled();
+        this.ccNodeFactor.onPluginDisabled(); // [CC]
+        this.ccEGToggle.set(false); // [CC]
+        this.ccOptionCC?.onPluginDisabled(); // [CC]
+        this.ccFilterRows.disable(); // [CC]
+        window.setTimeout(() => applyPanelLayout(this.view), 0); // [CC]
     }
 }
