@@ -1,5 +1,6 @@
 import { PinShape, PinShapeCircle, PinShapeData, PinShapeGrid, QueryData, QueryMatcher } from "../../internal";
 import { GraphInstances } from "../../pluginInstances";
+import { setFixedNodePosition } from "../../helpers/graph";
 
 export class Pinner {
     instances: GraphInstances;
@@ -40,20 +41,7 @@ export class Pinner {
         const extendedNode = this.instances.nodesSet.extendedElementsMap.get(id);
         if (!extendedNode) return;
         const node = extendedNode.coreElement;
-        if (x !== undefined) node.x = x;
-        if (y !== undefined) node.y = y;
-        node.fx = node.x;
-        node.fy = node.y;
-        this.instances.nodesSet.instances.renderer.worker.postMessage({
-            alpha: alpha, // temperature of the simulation
-            alphaTarget: 0, // target temperature to stop the simulation
-            run: true, // run the simulation
-            forceNode: {
-                id: node.id,
-                x: node.x,
-                y: node.y
-            }
-        });
+        setFixedNodePosition(this.instances.renderer, node, x ?? node.x, y ?? node.y, alpha);
         extendedNode.pin();
     }
 
@@ -61,18 +49,7 @@ export class Pinner {
         const extendedNode = this.instances.nodesSet.extendedElementsMap.get(id);
         if (!extendedNode) return;
         const node = extendedNode.coreElement;
-        node.fx = null;
-        node.fy = null;
-        this.instances.nodesSet.instances.renderer.worker.postMessage({
-            alpha: 0.3, // temperature of the simulation
-            alphaTarget: 0, // target temperature to stop the simulation
-            run: true, // run the simulation
-            forceNode: {
-                id: node.id,
-                x: null,
-                y: null
-            }
-        });
+        setFixedNodePosition(this.instances.renderer, node, null, null);
         if (Pinner.lastDraggedPinnedNode === id) Pinner.lastDraggedPinnedNode = null;
         extendedNode.unpin();
     }

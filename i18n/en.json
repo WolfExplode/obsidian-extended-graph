@@ -17,6 +17,17 @@
         "target": "Target",
         "valuePlaceholder": "value..."
     },
+    "radialLayout": {
+        "automatic": "Automatic radial layout",
+        "automaticDesc": "Find roots and arrange all visible branches as the graph changes.",
+        "animate": "Animate branches as they settle",
+        "heading": "Layout",
+        "hierarchy": "Branch from",
+        "parentLinks": "Parent property",
+        "outgoingLinks": "Outgoing links",
+        "spacing": "Branch spacing",
+        "crossLinks": "Show cross-links"
+    },
     "graphSearch": {
         "filterPlaceholder": "Filter notes by text or query…",
         "queryHint": "Use plain text or Obsidian operators such as file:, path:, tag:, and content:",

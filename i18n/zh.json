@@ -17,6 +17,17 @@
         "target": "目标",
         "valuePlaceholder": "输入值..."
     },
+    "radialLayout": {
+        "automatic": "自动径向布局",
+        "automaticDesc": "随图谱变化查找根节点并排列所有可见分支。",
+        "animate": "播放分支就位动画",
+        "heading": "布局",
+        "hierarchy": "分支依据",
+        "parentLinks": "Parent 属性",
+        "outgoingLinks": "出链",
+        "spacing": "分支间距",
+        "crossLinks": "显示交叉链接"
+    },
     "graphSearch": {
         "filterPlaceholder": "输入文本或查询语法以筛选笔记…",
         "queryHint": "可以输入普通文本，也可以使用 Obsidian 搜索运算符 file:、path:、tag: 和 content:",

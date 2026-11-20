@@ -31,6 +31,7 @@ import {
 import ExtendedGraphPlugin from "./main";
 import { GraphEngine, GraphRenderer, GraphView, LocalGraphView } from "obsidian-typings";
 import { GraphFilter } from "./graph/graphFilter";
+import { RadialLayout } from "./graph/layout/radialLayout";
 
 export class ExtendedGraphInstances {
     static plugin: ExtendedGraphPlugin; // init in main.ts
@@ -50,6 +51,7 @@ export class GraphInstances {
     readonly type: GraphType;
     readonly engine: GraphEngine;
     readonly renderer: GraphRenderer;
+    readonly radialLayout: RadialLayout;
 
     readonly interactiveManagers = new Map<string, InteractiveManager>();
 
@@ -95,6 +97,7 @@ export class GraphInstances {
         if (!engine) throw new Error("Graph engine is not initialized");
         this.engine = engine;
         this.renderer = this.view.renderer;
+        this.radialLayout = new RadialLayout(this);
     }
 
     private canonicalizeProperties() {

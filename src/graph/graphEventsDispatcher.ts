@@ -210,6 +210,9 @@ export class GraphEventsDispatcher extends Component {
                 }
             }
 
+            if (!this.instances.radialLayout.active && ExtendedGraphInstances.settings.radialAutoLayout[this.instances.type]) {
+                this.instances.radialLayout.setAutomatic();
+            }
             ExtendedGraphInstances.graphsManager.lifecycleManager.onPluginLoaded(this.instances.view);
 
             // Make sure to render multiple frames to let the elements fade in
@@ -329,6 +332,8 @@ export class GraphEventsDispatcher extends Component {
                     if (data) {
                         args[0] = data;
                         const res = Reflect.apply(target, thisArg, args);
+
+                        instances.radialLayout.apply();
 
                         // Recompute the graphology
                         instances.graphologyGraph?.buildGraphology();
@@ -538,6 +543,7 @@ export class GraphEventsDispatcher extends Component {
      * Called when the component is unloaded.
      */
     onunload(): void {
+        this.instances.radialLayout.release();
         this.unbindStageEvents();
         ExtendedGraphInstances.proxysManager.unregisterProxy(this.instances.renderer.renderCallback);
         ExtendedGraphInstances.proxysManager.unregisterProxy(this.instances.renderer.setData);
@@ -680,7 +686,8 @@ export class GraphEventsDispatcher extends Component {
 
     private updateData(data: GraphData): GraphData | undefined {
         // Filter out nodes
-        data = this.instances.filter.filterData(data);
+        data = this.instances.radialLayout.filter(this.instances.filter.filterData(data));
+        ExtendedGraphInstances.graphsManager.updateStatusBarItem(this.instances.view.leaf, Object.keys(data.nodes).length);
 
         // Disable extended links
         for (const extendedLink of this.instances.linksSet.extendedElementsMap.values()) {
@@ -786,6 +793,7 @@ export class GraphEventsDispatcher extends Component {
             const pinner = new Pinner(this.instances);
             pinner.setPinnedNodesFromState();
         }
+        this.instances.radialLayout.apply(true);
 
         // Update the graphics of folders in order to redraw the box when nodes move
         if (this.instances.foldersSet) this.instances.foldersSet.updateGraphics();

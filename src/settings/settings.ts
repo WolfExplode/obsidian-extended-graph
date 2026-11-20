@@ -66,6 +66,8 @@ export interface ExtendedGraphSettings {
 
     // Graph settings
     backupGraphOptions: EngineOptions;
+    radialAutoLayout: Record<GraphType, boolean>;
+    radialMotion: boolean | null;
     openInNewTab: boolean;
     canonicalizePropertiesWithDataview: boolean;
 
@@ -249,6 +251,8 @@ export const DEFAULT_STATE_SETTINGS: GraphStateData = {
 
 let shapeQueriesIndex = 0;
 export const DEFAULT_SETTINGS: ExtendedGraphSettings = {
+    radialAutoLayout: { graph: false, localgraph: false },
+    radialMotion: null,
     // Feature toggles
     enableFeatures: {
         'graph': {

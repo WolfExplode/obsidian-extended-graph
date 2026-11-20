@@ -76,7 +76,8 @@ export class GraphsManager extends Component {
 
     lastBackup: string;
 
-    statusBarItem: HTMLElement;
+    private statusBarItem?: HTMLElement;
+    private statusBarGraphID?: string;
 
 
     constructor() {
@@ -97,8 +98,24 @@ export class GraphsManager extends Component {
     }
 
     private addStatusBarItem(): void {
-        this.statusBarItem = ExtendedGraphInstances.plugin.addStatusBarItem();
-        this.statusBarItem.addClasses(['plugin-extended-graph']);
+        const item = ExtendedGraphInstances.plugin.addStatusBarItem();
+        // Remove counters left behind by earlier versions during plugin reloads.
+        item.parentElement?.querySelectorAll(":scope > .status-bar-item.plugin-extended-graph")
+            .forEach(stale => {
+                if (stale !== item) stale.remove();
+            });
+        item.addClass("plugin-extended-graph");
+        item.hide();
+        this.statusBarItem = item;
+        this.registerDomEvent(item, "click", () => {
+            const instances = this.statusBarGraphID && this.allInstances.get(this.statusBarGraphID);
+            if (instances) new GraphStateModal(instances).open();
+        });
+        this.register(() => {
+            this.statusBarItem = undefined;
+            this.statusBarGraphID = undefined;
+            item.remove();
+        });
     }
 
     private registerEvents() {
@@ -591,40 +608,29 @@ export class GraphsManager extends Component {
     // =============================== STATUS BAR ==============================
 
     updateStatusBarItem(leaf: WorkspaceLeaf | null, numberOfNodes?: number) {
-        // Change the number of nodes in the status bar
-        this.statusBarItem.detach();
-        this.addStatusBarItem();
-
-        if (leaf && (leaf.view.getViewType() === "graph" || leaf.view.getViewType() === "localgraph")) {
-            // Add the number of nodes
-            if (numberOfNodes === undefined) numberOfNodes = (leaf.view as GraphView | LocalGraphView).renderer.nodes.length;
-            if (numberOfNodes !== undefined) {
-                this.statusBarItem.createSpan({ text: numberOfNodes.toString() + " " + t("plugin.nodes"), cls: "status-bar-item-segment" });
-            }
-
-            const instances = this.allInstances.get(leaf.id);
-            if (instances) {
-                // Open the graph state modal on click
-                this.statusBarItem.addClass("mod-clickable");
-                this.statusBarItem.addEventListener('click', () => {
-                    const modal = new GraphStateModal(instances);
-                    modal.open();
-                });
-
-                // Add the number of selected nodes
-                const numberOfSelectedNodes = Object.keys(instances.nodesSet.selectedNodes).length;
-                if (numberOfSelectedNodes > 0) {
-                    this.statusBarItem.createSpan({ text: `(${numberOfSelectedNodes} ${t("inputs.selected")})`, cls: "status-bar-item-segment" });
-                }
-
-                // Add the info button
-                const infoButton = createSpan({ cls: "status-bar-item-icon status-bar-item-segment" });
-                setIcon(infoButton, "info");
-                this.statusBarItem.appendChild(infoButton);
-            }
-            else {
-                this.statusBarItem.removeClass("mod-clickable");
-            }
+        const item = this.statusBarItem;
+        if (!item) return;
+        item.empty();
+        this.statusBarGraphID = undefined;
+        item.removeClass("mod-clickable");
+        if (!leaf || (leaf.view.getViewType() !== "graph" && leaf.view.getViewType() !== "localgraph")) {
+            item.hide();
+            return;
         }
+
+        item.show();
+        const count = numberOfNodes ?? (leaf.view as GraphView | LocalGraphView).renderer.nodes.length;
+        item.createSpan({ text: `${count} ${t("plugin.nodes")}`, cls: "status-bar-item-segment" });
+
+        const instances = this.allInstances.get(leaf.id);
+        if (!instances) return;
+        this.statusBarGraphID = leaf.id;
+        item.addClass("mod-clickable");
+        const selectedCount = Object.keys(instances.nodesSet.selectedNodes).length;
+        if (selectedCount > 0) {
+            item.createSpan({ text: `(${selectedCount} ${t("inputs.selected")})`, cls: "status-bar-item-segment" });
+        }
+        const infoButton = item.createSpan({ cls: "status-bar-item-icon status-bar-item-segment" });
+        setIcon(infoButton, "info");
     }
 }

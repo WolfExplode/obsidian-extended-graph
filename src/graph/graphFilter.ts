@@ -56,8 +56,6 @@ export class GraphFilter {
 
         data = this.filterOrphans(data, potentialOrphans);
 
-        ExtendedGraphInstances.graphsManager.updateStatusBarItem(this.instances.view.leaf, Object.keys(data.nodes).length);
-
         return data;
     }
 

@@ -1,5 +1,5 @@
 import { WorkspaceLeaf } from "obsidian";
-import { GraphEngine, GraphView, LocalGraphView } from "obsidian-typings";
+import { GraphEngine, GraphNode, GraphRenderer, GraphView, LocalGraphView } from "obsidian-typings";
 import { Container, DisplayObject, Text } from 'pixi.js';
 import { ExtendedGraphInstances } from "../pluginInstances";
 
@@ -31,6 +31,19 @@ export function getEngine(view: GraphView | LocalGraphView): GraphEngine | undef
     else {
         return (view as LocalGraphView).engine;
     }
+}
+
+export function setFixedNodePosition(renderer: GraphRenderer, node: GraphNode, x: number | null, y: number | null, alpha = 0.3): void {
+    node.fx = x;
+    node.fy = y;
+    if (x !== null) node.x = x;
+    if (y !== null) node.y = y;
+    renderer.worker.postMessage({
+        alpha,
+        alphaTarget: 0,
+        run: true,
+        forceNode: { id: node.id, x, y }
+    });
 }
 
 export function fadeIn(element: DisplayObject & { hasFaded: boolean, maxAlpha?: number }, callback?: () => void) {

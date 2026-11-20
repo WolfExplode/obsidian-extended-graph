@@ -17,6 +17,17 @@
         "target": "Cible",
         "valuePlaceholder": "valeur..."
     },
+    "radialLayout": {
+        "automatic": "Disposition radiale automatique",
+        "automaticDesc": "Trouve les racines et dispose les branches visibles quand le graphe change.",
+        "animate": "Animer la mise en place des branches",
+        "heading": "Disposition",
+        "hierarchy": "Former les branches avec",
+        "parentLinks": "Propriété Parent",
+        "outgoingLinks": "Liens sortants",
+        "spacing": "Espacement des branches",
+        "crossLinks": "Afficher les liens transversaux"
+    },
     "graphSearch": {
         "filterPlaceholder": "Filtrer par texte ou requête…",
         "queryHint": "Utilisez du texte ou les opérateurs Obsidian file:, path:, tag: et content:",

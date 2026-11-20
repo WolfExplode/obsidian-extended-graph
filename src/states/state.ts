@@ -29,7 +29,8 @@ export class GraphState {
         this.data.pinNodes = {};
         for (const [id, extendedNode] of instances.nodesSet.extendedElementsMap) {
             if (extendedNode.isPinned) {
-                this.data.pinNodes[id] = { x: extendedNode.coreElement.x, y: extendedNode.coreElement.y };
+                const pin = instances.radialLayout.active ? extendedNode.pinnedPosition : undefined;
+                this.data.pinNodes[id] = pin ?? { x: extendedNode.coreElement.x, y: extendedNode.coreElement.y };
             }
         }
 
