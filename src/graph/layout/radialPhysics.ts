@@ -175,12 +175,34 @@ export class RadialPhysics {
             const dy = b.y - a.y;
             const length = Math.hypot(dx, dy);
             if (length < 0.001) continue;
-            // Restore the seed bearing so a rotation cannot propagate down the tree.
-            const slack = this.edges.has(edge.parent) ? Math.PI / 10 : Math.PI / 36;
-            const turn = outside(angleDifference(edge.angle, Math.atan2(dy, dx)), slack);
-            const lengthForce = outside(edge.length - length, edge.length * 0.17) * 0.025;
-            const turnForce = turn * Math.min(length, this.spacing) * 0.034 / length;
-            this.pushApart(a, b, dx * lengthForce / length - dy * turnForce, dy * lengthForce / length + dx * turnForce);
+            // A fork keeps its resting angle relative to the limb it grows from.
+            const incoming = this.edges.get(a.id);
+            const trunk = incoming && bodies.get(incoming.parent);
+            let targetAngle = edge.angle;
+            let inX = 0;
+            let inY = 0;
+            let inLength = 0;
+            if (incoming && trunk) {
+                inX = a.x - trunk.x;
+                inY = a.y - trunk.y;
+                inLength = Math.hypot(inX, inY);
+                if (inLength > 0.001) {
+                    targetAngle += angleDifference(Math.atan2(inY, inX), incoming.angle);
+                }
+            }
+
+            const slack = incoming ? Math.PI / 24 : Math.PI / 36;
+            const bend = outside(angleDifference(targetAngle, Math.atan2(dy, dx)), slack);
+            const lever = Math.min(length, inLength || length, this.spacing);
+            const torque = bend * lever * lever * 0.055;
+            const stretch = outside(edge.length - length, edge.length * 0.08) * 0.055;
+            const tangent = torque / (length * length);
+            this.pushApart(a, b, dx * stretch / length - dy * tangent, dy * stretch / length + dx * tangent);
+            // Apply the opposite torque to the incoming limb so dragging a tip bends the joint too.
+            if (trunk && inLength > 0.001) {
+                const reaction = torque / (inLength * inLength);
+                this.pushApart(trunk, a, inY * reaction, -inX * reaction);
+            }
         }
     }
 

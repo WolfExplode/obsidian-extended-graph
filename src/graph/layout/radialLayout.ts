@@ -169,8 +169,8 @@ export class RadialLayout {
         workerState.workerResults = null;
         let moved = this.physics.sync(renderer.nodes, this.positions);
         if (advance) {
-            if (this.animate) moved = this.physics.step(renderer.nodes) || moved;
-            else if (!renderer.dragNode) moved = this.physics.step(renderer.nodes, 48) || moved;
+            const steps = this.animate ? 1 : 48;
+            moved = this.physics.step(renderer.nodes, steps) || moved;
         }
         if (this.fitOnRender && renderer.width && renderer.height) {
             this.fitOnRender = false;

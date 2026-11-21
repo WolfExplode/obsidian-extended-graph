@@ -26,8 +26,12 @@ export class InputsManager {
     }
 
     bindStageEvents(): void {
+        const stage = this.instances.renderer.px.stage;
+        stage.on('pointerdowncapture', this.onMiddleButtonDown, this);
+        stage.on('clickcapture', this.onMiddleButtonClick, this);
+
         this.onPointerDownOnStage = this.onPointerDownOnStage.bind(this);
-        this.instances.renderer.px.stage.on('pointerdown', this.onPointerDownOnStage);
+        stage.on('pointerdown', this.onPointerDownOnStage);
 
         this.onPointerUpOnStage = this.onPointerUpOnStage.bind(this);
         this.instances.renderer.px.stage.on('pointerup', this.onPointerUpOnStage);
@@ -61,6 +65,8 @@ export class InputsManager {
     }
 
     unbindStageEvents() {
+        this.instances.renderer.px.stage.off('pointerdowncapture', this.onMiddleButtonDown, this);
+        this.instances.renderer.px.stage.off('clickcapture', this.onMiddleButtonClick, this);
         this.instances.renderer.px.stage.off('pointerdown', this.onPointerDownOnStage);
         this.instances.renderer.px.stage.off('pointerup', this.onPointerUpOnStage);
         this.instances.renderer.px.stage.off('pointermove', this.onPointerMoveOnStage);
@@ -82,6 +88,22 @@ export class InputsManager {
     }
 
     // ========================= POINTERS UP/DOWN/MOVE =========================
+
+    private onMiddleButtonDown(e: FederatedPointerEvent): void {
+        if (e.button !== 1) return;
+
+        const { px: { stage }, hanger } = this.instances.renderer;
+        // Obsidian installs its pan handler on the background next to the node container.
+        const background = stage.children.find(child => child !== hanger && child.listenerCount('pointerdown') > 0);
+        if (background === e.target) return;
+
+        e.stopPropagation();
+        background?.emit('pointerdown', e);
+    }
+
+    private onMiddleButtonClick(e: FederatedPointerEvent): void {
+        if (e.button === 1) e.stopPropagation();
+    }
 
     private onPointerDownOnStage(e: FederatedPointerEvent): void {
         this.preventDraggingPinnedNodes();
@@ -176,6 +198,8 @@ export class InputsManager {
     }
 
     private onInputToUnselectNodes(e: FederatedPointerEvent | MouseEvent | KeyboardEvent) {
+        if ("button" in e && e.button === 1) return;
+
         if (!("instanceOf" in e && e.instanceOf(KeyboardEvent)) || e.key === "Escape") {
             if ("target" in e && this.instances.renderer.nodes.find(n => n.circle === e.target) && !this.isDragging) {
                 return; // Don't unselect if a node was targeted

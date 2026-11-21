@@ -3,6 +3,8 @@ import { GraphNode } from "obsidian-typings";
 import { Point, TextMetrics, TextStyle } from "pixi.js";
 import { CSSBridge, getFile, getFileInteractives, GraphInstances, hex2int, rgb2int, textStyleFill2int } from "../../internal";
 
+const HOVER_LABEL_ZOOM_FACTOR = 2;
+
 export class ExtendedGraphText {
     coreElement: GraphNode;
     instances: GraphInstances;
@@ -283,15 +285,22 @@ export class ExtendedGraphText {
         if (!text) return;
 
         const renderer = this.coreElement.renderer;
-        const revealNeighbor = this.instances.settings.enableFeatures[this.instances.type].names &&
-            this.instances.settings.showNamesWhenNeighborHighlighted && renderer.scale >= renderer.fTextShowMult + 0.1;
-        if (!text.visible && (!revealNeighbor || !this.coreElement.circle?.visible)) return;
-
         const distance = this.instances.nodesSet.getHoverDistance(this.coreElement);
         if (!distance) return;
 
+        let opacity = distance === 1 ? 1 : distance === 2 ? 0.6 : 0.32;
         if (!text.visible) {
-            if (distance !== 1) return;
+            if (distance !== 1 || !this.coreElement.circle?.visible) return;
+
+            const revealNeighbor = this.instances.settings.enableFeatures[this.instances.type].names &&
+                this.instances.settings.showNamesWhenNeighborHighlighted && renderer.scale >= renderer.fTextShowMult + 0.1;
+            if (!revealNeighbor) {
+                // Use Obsidian's logarithmic fade at twice the current zoom for direct neighbors.
+                const labelScale = renderer.scale * HOVER_LABEL_ZOOM_FACTOR;
+                opacity = Math.min(1, Math.log2(labelScale) + 1 - renderer.fTextShowMult);
+            }
+            if (opacity * renderer.colors.text.a <= 0.001) return;
+
             // The native renderer skips label positioning and scaling when the label is hidden.
             text.visible = true;
             text.position.set(
@@ -300,7 +309,6 @@ export class ExtendedGraphText {
             );
             text.scale.set(renderer.scale < 1 ? 1 / renderer.scale : renderer.nodeScale);
         }
-        const opacity = distance === 1 ? 1 : distance === 2 ? 0.6 : 0.32;
         text.alpha = opacity * renderer.colors.text.a;
     }
 }
