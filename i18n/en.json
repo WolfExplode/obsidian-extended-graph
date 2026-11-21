@@ -23,10 +23,24 @@
         "animate": "Animate branches as they settle",
         "heading": "Layout",
         "hierarchy": "Branch from",
+        "hierarchyDesc": "The Parent property defines branches. If no parent links are visible, branches use outgoing links.",
         "parentLinks": "Parent property",
         "outgoingLinks": "Outgoing links",
+        "parentSelection": "Parent links to keep",
+        "parentSelectionDesc": "Closest tier keeps parents nearest one tier above the child, including ties. First listed uses only the first Parent entry. If it is unavailable, later entries are skipped.",
+        "closestTier": "Closest tier",
+        "firstParent": "First listed",
+        "allParents": "All declared",
         "spacing": "Branch spacing",
-        "crossLinks": "Show cross-links"
+        "crossLinks": "Show cross-links",
+        "crossLinksDesc": "Show other links between visible notes. The parent-link rule still applies."
+    },
+    "nodeWeight": {
+        "source": "Weight source",
+        "sourceHelp": "Use linked notes or count every visible descendant in the radial tree. With radial layout off, sizing uses linked notes.",
+        "linkedNotes": "Linked notes",
+        "descendants": "Descendants",
+        "descendantEquation": "Node weight = descendants"
     },
     "graphSearch": {
         "filterPlaceholder": "Filter notes by text or query…",

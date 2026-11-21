@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSectionPerGraphType, t } from "../internal";
 import { SettingMultiPropertiesModal } from "../ui/modals/settingPropertiesModal";
@@ -26,7 +28,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setDesc(t("features.namesNumberOfCharactersDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.numberOfCharacters?.toString() || '')
+                cb.setValue(ExtendedGraphInstances.settings.numberOfCharacters?.toString() || '').then(control => resetValue(control, DEFAULT_SETTINGS.numberOfCharacters?.toString() || ''))
                     .onChange(async (value) => {
                         const intValue = parseInt(value);
                         if (!isNaN(intValue)) {
@@ -41,7 +43,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .addText(cb => {
                 cb.inputEl.addClass("number");
                 cb.setPlaceholder(t("features.namesEllipsisPlaceholder"))
-                cb.setValue(ExtendedGraphInstances.settings.ellipsis.toString())
+                cb.setValue(ExtendedGraphInstances.settings.ellipsis.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.ellipsis.toString()))
                     .onChange(async (value) => {
                         ExtendedGraphInstances.settings.ellipsis = value;
                         await ExtendedGraphInstances.plugin.saveSettings();
@@ -54,7 +56,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setName(t("features.namesShowOnlyFileName"))
             .setDesc(t("features.namesShowOnlyFileNameDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.showOnlyFileName);
+                cb.setValue(ExtendedGraphInstances.settings.showOnlyFileName).then(control => resetValue(control, DEFAULT_SETTINGS.showOnlyFileName));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.showOnlyFileName = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -67,7 +69,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setName(t("features.namesNoExtension"))
             .setDesc(t("features.namesNoExtensionDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.noExtension);
+                cb.setValue(ExtendedGraphInstances.settings.noExtension).then(control => resetValue(control, DEFAULT_SETTINGS.noExtension));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.noExtension = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -81,6 +83,10 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setDesc(t("features.namesUsePropertiesDesc"))
             .addExtraButton(cb => {
                 cb.setIcon('mouse-pointer-click');
+                onMiddleClickReset(cb.extraSettingsEl, () => {
+                    ExtendedGraphInstances.settings.usePropertiesForName = [...DEFAULT_SETTINGS.usePropertiesForName];
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new SettingMultiPropertiesModal(
                         t("features.namesUseProperties"),
@@ -98,7 +104,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setName(t("features.namesBackground"))
             .setDesc(t("features.namesBackgroundDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.addBackgroundToName);
+                cb.setValue(ExtendedGraphInstances.settings.addBackgroundToName).then(control => resetValue(control, DEFAULT_SETTINGS.addBackgroundToName));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.addBackgroundToName = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -111,7 +117,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setName(t("features.namesDynamicVerticalOffset"))
             .setDesc(t("features.namesDynamicVerticalOffsetDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.dynamicVerticalOffset);
+                cb.setValue(ExtendedGraphInstances.settings.dynamicVerticalOffset).then(control => resetValue(control, DEFAULT_SETTINGS.dynamicVerticalOffset));
                 cb.onChange(value => {
                     this.verticalOffset.setDisabled(value);
                     ExtendedGraphInstances.settings.dynamicVerticalOffset = value;
@@ -126,7 +132,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setDesc(t("features.namesVerticalOffsetDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.nameVerticalOffset.toString());
+                cb.setValue(ExtendedGraphInstances.settings.nameVerticalOffset.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.nameVerticalOffset.toString()));
                 cb.onChange(value => {
                     const intValue = parseInt(value);
                     ExtendedGraphInstances.settings.nameVerticalOffset = isNaN(intValue) ? 0 : intValue;
@@ -143,7 +149,7 @@ export class SettingNames extends SettingsSectionPerGraphType {
             .setName(t("features.namesShowWhenNeighborHighlighted"))
             .setDesc(t("features.namesShowWhenNeighborHighlightedDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.showNamesWhenNeighborHighlighted);
+                cb.setValue(ExtendedGraphInstances.settings.showNamesWhenNeighborHighlighted).then(control => resetValue(control, DEFAULT_SETTINGS.showNamesWhenNeighborHighlighted));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.showNamesWhenNeighborHighlighted = value;
                     ExtendedGraphInstances.plugin.saveSettings();

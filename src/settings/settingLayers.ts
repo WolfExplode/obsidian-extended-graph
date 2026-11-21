@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { ButtonComponent, setIcon, Setting, TextComponent } from "obsidian";
 import { ExtendedGraphSettingTab, LayersManager, ExtendedGraphInstances, SettingsSectionPerGraphType, SettingMultiPropertiesModal, t, UIElements, Layer, getDataviewPlugin } from "../internal";
 
@@ -27,6 +29,10 @@ export class SettingLayers extends SettingsSectionPerGraphType {
             .setDesc(t("features.layerPropertiesDesc"))
             .addExtraButton(cb => {
                 cb.setIcon('mouse-pointer-click');
+                onMiddleClickReset(cb.extraSettingsEl, () => {
+                    ExtendedGraphInstances.settings.layerProperties = [...DEFAULT_SETTINGS.layerProperties];
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new SettingMultiPropertiesModal(
                         t("features.layerProperties"),
@@ -45,7 +51,7 @@ export class SettingLayers extends SettingsSectionPerGraphType {
             .setDesc(t("features.layersNumberDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.numberOfActiveLayers.toString())
+                cb.setValue(ExtendedGraphInstances.settings.numberOfActiveLayers.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.numberOfActiveLayers.toString()))
                     .onChange(async (value) => {
                         const intValue = parseInt(value);
                         if (!isNaN(intValue) && intValue > 0) {
@@ -64,7 +70,7 @@ export class SettingLayers extends SettingsSectionPerGraphType {
                 cb.addOptions({
                     "ASC": "0-9",
                     "DESC": "9-0"
-                }).setValue(ExtendedGraphInstances.settings.layersOrder)
+                }).setValue(ExtendedGraphInstances.settings.layersOrder).then(control => resetValue(control, DEFAULT_SETTINGS.layersOrder))
                     .onChange(async (value) => {
                         if (value === "ASC" || value === "DESC") {
                             ExtendedGraphInstances.settings.layersOrder = value;
@@ -80,7 +86,7 @@ export class SettingLayers extends SettingsSectionPerGraphType {
             .setDesc(t("features.layersOpacityIfNoLayerDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.nodesWithoutLayerOpacity.toString())
+                cb.setValue(ExtendedGraphInstances.settings.nodesWithoutLayerOpacity.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.nodesWithoutLayerOpacity.toString()))
                     .onChange(async (value) => {
                         const floatValue = parseFloat(value);
                         if (!isNaN(floatValue)) {
@@ -96,7 +102,7 @@ export class SettingLayers extends SettingsSectionPerGraphType {
             .setName(t("features.layersUseCustomOpacity"))
             .setDesc(t("features.layersUseCustomOpacityDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.useLayerCustomOpacity)
+                cb.setValue(ExtendedGraphInstances.settings.useLayerCustomOpacity).then(control => resetValue(control, DEFAULT_SETTINGS.useLayerCustomOpacity))
                     .onChange(async (value) => {
                         ExtendedGraphInstances.settings.useLayerCustomOpacity = value;
                         await ExtendedGraphInstances.plugin.saveSettings();
@@ -153,7 +159,7 @@ export class SettingLayers extends SettingsSectionPerGraphType {
             .setName(t("features.layersDisplayLabels"))
             .setDesc(t("features.layersDisplayLabelsDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.displayLabelsInUI)
+                cb.setValue(ExtendedGraphInstances.settings.displayLabelsInUI).then(control => resetValue(control, DEFAULT_SETTINGS.displayLabelsInUI))
                     .onChange(async (value) => {
                         ExtendedGraphInstances.settings.displayLabelsInUI = value;
                         await ExtendedGraphInstances.plugin.saveSettings();
@@ -270,6 +276,7 @@ class LayerSetting extends Setting {
         this.addText(cb => {
             this.levelInput = cb;
             cb.inputEl.addClass("number");
+            onMiddleClickReset(cb.inputEl, () => cb.setValue(this.layer.levelFromDefault ? "" : this.layer.level.toString()));
             if (this.layer.levelFromDefault) {
                 cb.setPlaceholder(this.layer.level.toString());
             }
@@ -287,6 +294,7 @@ class LayerSetting extends Setting {
         return this.addText(cb => {
             this.labelInput = cb;
             this.labelInput.setValue(this.layer.label);
+            onMiddleClickReset(cb.inputEl, () => cb.setValue(this.layer.label));
         })
     }
 
@@ -302,7 +310,7 @@ class LayerSetting extends Setting {
         this.addText(cb => {
             cb.inputEl.addClass("number");
             cb.setPlaceholder(t("features.layersOpacityPlaceholder"));
-            cb.setValue(ExtendedGraphInstances.settings.layersCustomOpacity[this.layer.level]?.toString() ?? "");
+            cb.setValue(ExtendedGraphInstances.settings.layersCustomOpacity[this.layer.level]?.toString() ?? "").then(control => resetValue(control, DEFAULT_SETTINGS.layersCustomOpacity[this.layer.level]?.toString() ?? ""));
             cb.onChange(async (value) => {
                 const floatValue = parseFloat(value);
                 if (!isNaN(floatValue)) {

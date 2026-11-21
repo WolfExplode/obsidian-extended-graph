@@ -1,5 +1,6 @@
 import { DropdownComponent, Setting } from "obsidian";
 import { cmOptions, ExtendedGraphSettingTab, GradientPickerModal, plotColorMapFromName, ExtendedGraphInstances, t } from "../../internal";
+import { resetValue } from "../resetControl";
 
 export class SettingColorPalette extends Setting {
     canvasPalette: HTMLCanvasElement;
@@ -8,7 +9,7 @@ export class SettingColorPalette extends Setting {
 
     private onPaletteChanged: (palette: string) => void
 
-    constructor(containerEl: HTMLElement, settingTab: ExtendedGraphSettingTab, uniqueKey: string) {
+    constructor(containerEl: HTMLElement, settingTab: ExtendedGraphSettingTab, uniqueKey: string, defaultPalette: string) {
         super(containerEl);
         this.settingTab = settingTab;
         this.setName(t("features.interactives.palette"));
@@ -49,6 +50,7 @@ export class SettingColorPalette extends Setting {
             }
             // Custom
             this.populateCustomOptions();
+            resetValue(cb, defaultPalette);
             // On change
             cb.onChange(async (palette) => {
                 if (palette === "") return;

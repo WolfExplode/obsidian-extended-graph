@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, FeatureSetting, ExtendedGraphInstances, SettingsSection, t } from "../internal";
 import { SettingMultiPropertiesModal } from "../ui/modals/settingPropertiesModal";
@@ -29,6 +31,10 @@ export class SettingImages extends SettingsSection {
             .setDesc(t("features.imagePropertiesDesc"))
             .addExtraButton(cb => {
                 cb.setIcon('mouse-pointer-click');
+                onMiddleClickReset(cb.extraSettingsEl, () => {
+                    ExtendedGraphInstances.settings.imageProperties = [...DEFAULT_SETTINGS.imageProperties];
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new SettingMultiPropertiesModal(
                         t("features.imageProperties"),
@@ -69,7 +75,7 @@ export class SettingImages extends SettingsSection {
                     cb.sliderEl.parentElement?.insertBefore(preview, cb.sliderEl);
                 }
                 cb.setLimits(0, 50, 1)
-                    .setValue(ExtendedGraphInstances.settings.borderFactor * 100)
+                    .setValue(ExtendedGraphInstances.settings.borderFactor * 100).then(control => resetValue(control, DEFAULT_SETTINGS.borderFactor * 100))
                     .onChange(value => {
                         ExtendedGraphInstances.settings.borderFactor = value / 100;
                         if (preview) preview.textContent = ExtendedGraphInstances.settings.borderFactor.toString() + "%";
@@ -86,7 +92,7 @@ export class SettingImages extends SettingsSection {
             .setName(t("features.imagesAllowExternal"))
             .setDesc(t("features.imagesAllowExternalDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.allowExternalImages);
+                cb.setValue(ExtendedGraphInstances.settings.allowExternalImages).then(control => resetValue(control, DEFAULT_SETTINGS.allowExternalImages));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.allowExternalImages = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -97,7 +103,7 @@ export class SettingImages extends SettingsSection {
             .setName(t("features.imagesAllowExternalLocal"))
             .setDesc(t("features.imagesAllowExternalLocalDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.allowExternalLocalImages);
+                cb.setValue(ExtendedGraphInstances.settings.allowExternalLocalImages).then(control => resetValue(control, DEFAULT_SETTINGS.allowExternalLocalImages));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.allowExternalLocalImages = value;
                     ExtendedGraphInstances.plugin.saveSettings();

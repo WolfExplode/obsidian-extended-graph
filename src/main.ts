@@ -182,7 +182,7 @@ export default class ExtendedGraphPlugin extends Plugin {
             data = this.migrateSettings(data);
         }
         else {
-            data = DEFAULT_SETTINGS;
+            data = structuredClone(DEFAULT_SETTINGS);
         }
 
         // Deep load default settings
@@ -191,8 +191,7 @@ export default class ExtendedGraphPlugin extends Plugin {
     }
 
     private migrateSettings(settings: any): any {
-        if (!settings) return DEFAULT_SETTINGS;
-        if (typeof settings !== "object") return DEFAULT_SETTINGS;
+        if (!settings || typeof settings !== "object") return structuredClone(DEFAULT_SETTINGS);
 
         // Remove invalid shallow keys
         for (const key in settings) {
@@ -397,7 +396,7 @@ export default class ExtendedGraphPlugin extends Plugin {
         for (const key in defaultSettings) {
             // Add settings
             if (!userSettings.hasOwnProperty(key)) {
-                userSettings[key] = defaultSettings[key];
+                userSettings[key] = structuredClone(defaultSettings[key]);
             }
             // Or recursively complete settings
             else {

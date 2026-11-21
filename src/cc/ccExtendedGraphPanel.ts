@@ -3,6 +3,7 @@
  *  - on/off switch in its title (enables/disables Extended Graph on this graph view),
  *  - compact options, and the "Other settings" section at the end of the plugin settings page.
  */
+import { onMiddleClickReset, resetValue } from "../settings/resetControl";
 import { ExtraButtonComponent, setIcon, Setting, ToggleComponent } from "obsidian";
 import { GraphView, LocalGraphView } from "obsidian-typings";
 import { addHeaderToggle, HeaderToggle, renameSection } from "./ccPanel";
@@ -63,6 +64,10 @@ export function addCCOtherSettings(container: HTMLElement): void {
     };
     setCollapsed(CCSettings.data.otherCollapsed);
     fold.onClick(() => { setCollapsed(!header.settingEl.hasClass("is-collapsed")); void CCSettings.save(); });
+    onMiddleClickReset(fold.extraSettingsEl, () => {
+        setCollapsed(true);
+        void CCSettings.save();
+    });
 
     // Nav entry ("Go to" bar), like the other sections
     const nav = container.querySelector<HTMLElement>(".extended-graph-nav-settings");
@@ -81,7 +86,7 @@ export function addCCOtherSettings(container: HTMLElement): void {
     const ctl = row.controlEl.createDiv({ cls: "toggle-labelled" });
     ctl.createSpan({ text: "Compact mode" });
     new ToggleComponent(ctl)
-        .setValue(CCSettings.data.egPanelCompact)
+        .setValue(CCSettings.data.egPanelCompact).then(control => resetValue(control, false))
         .setTooltip("On: show only essential options. Off: all options.")
         .onChange(async v => {
             CCSettings.data.egPanelCompact = v;
@@ -94,7 +99,7 @@ export function addCCOtherSettings(container: HTMLElement): void {
     const dbg = new Setting(container)
         .setName("Debug log")
         .setDesc("Writes one diagnostic file per session in the plugin folder (logs). Nothing leaves your computer.")
-        .addToggle(t => t.setValue(CCSettings.data.debugLog).onChange(async v => {
+        .addToggle(t => t.setValue(CCSettings.data.debugLog).then(control => resetValue(control, false)).onChange(async v => {
             CCSettings.data.debugLog = v;
             await CCSettings.save();
             CCLogger.setEnabled(v);

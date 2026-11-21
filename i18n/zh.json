@@ -23,10 +23,24 @@
         "animate": "播放分支就位动画",
         "heading": "布局",
         "hierarchy": "分支依据",
+        "hierarchyDesc": "通过 Parent 属性生成分支。如果没有可见的父级链接，则使用出链。",
         "parentLinks": "Parent 属性",
         "outgoingLinks": "出链",
+        "parentSelection": "保留的父级链接",
+        "parentSelectionDesc": "最接近的层级会保留最接近子节点上一层的父级，距离相同的父级都会保留。仅首项只使用 Parent 的第一项。首项不可用时，仍会跳过后续项。",
+        "closestTier": "最接近的层级",
+        "firstParent": "仅首项",
+        "allParents": "全部指定父级",
         "spacing": "分支间距",
-        "crossLinks": "显示交叉链接"
+        "crossLinks": "显示交叉链接",
+        "crossLinksDesc": "显示可见笔记之间的其他链接。父级链接仍遵循所选规则。"
+    },
+    "nodeWeight": {
+        "source": "权重来源",
+        "sourceHelp": "使用链接笔记数，或统计径向树中所有可见的后代节点。关闭径向布局时，使用链接笔记数。",
+        "linkedNotes": "链接笔记",
+        "descendants": "后代节点",
+        "descendantEquation": "节点权重 = 后代节点数"
     },
     "graphSearch": {
         "filterPlaceholder": "输入文本或查询语法以筛选笔记…",

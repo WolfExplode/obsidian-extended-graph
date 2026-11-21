@@ -1,3 +1,5 @@
+import type { RadialLinkSettings } from "../../settings/settings";
+
 type Point = { x: number; y: number };
 type Branch = {
     id: string;
@@ -6,15 +8,18 @@ type Branch = {
     angle: number;
 };
 
-function buildRadialTree(root: string, links: ReadonlyMap<string, readonly string[]>, spacing: number, claimed: Set<string>) {
+function buildRadialTree(
+    root: string, links: ReadonlyMap<string, readonly string[]>, spacing: number,
+    tiers: Map<string, number>, descendants: Map<string, number>
+) {
     const trunk: Branch = { id: root, children: [], leaves: 1, angle: 0 };
-    claimed.add(root);
+    tiers.set(root, 0);
     const branches = [trunk];
     const parents = new Map<string, string>();
     for (const branch of branches) {
         for (const id of links.get(branch.id) ?? []) {
-            if (claimed.has(id)) continue;
-            claimed.add(id);
+            if (tiers.has(id)) continue;
+            tiers.set(id, tiers.get(branch.id)! + 1);
             const child: Branch = { id, children: [], leaves: 1, angle: 0 };
             parents.set(id, branch.id);
             branch.children.push(child);
@@ -23,7 +28,14 @@ function buildRadialTree(root: string, links: ReadonlyMap<string, readonly strin
     }
     for (let i = branches.length - 1; i >= 0; --i) {
         const branch = branches[i];
-        if (branch.children.length) branch.leaves = branch.children.reduce((sum, child) => sum + child.leaves, 0);
+        let descendantCount = 0;
+        let leafCount = 0;
+        for (const child of branch.children) {
+            descendantCount += 1 + descendants.get(child.id)!;
+            leafCount += child.leaves;
+        }
+        descendants.set(branch.id, descendantCount);
+        branch.leaves = Math.max(1, leafCount);
     }
 
     const positions = new Map<string, Point>([[root, { x: 0, y: 0 }]]);
@@ -73,13 +85,14 @@ export function buildRadialForest(ids: string[], links: ReadonlyMap<string, read
     }
     const order = [...ids].sort((a, b) => Number(hasParent.has(a)) - Number(hasParent.has(b))
         || (links.get(b)?.length ?? 0) - (links.get(a)?.length ?? 0) || a.localeCompare(b));
-    const claimed = new Set<string>();
+    const tiers = new Map<string, number>();
+    const descendants = new Map<string, number>();
     const parents = new Map<string, string>();
     const trees = [];
     const gap = spacing * 0.35;
     for (const root of order) {
-        if (claimed.has(root)) continue;
-        const tree = buildRadialTree(root, links, spacing, claimed);
+        if (tiers.has(root)) continue;
+        const tree = buildRadialTree(root, links, spacing, tiers, descendants);
         let radius = gap / 2;
         for (const point of tree.positions.values()) radius = Math.max(radius, Math.hypot(point.x, point.y));
         for (const [child, parent] of tree.parents) parents.set(child, parent);
@@ -87,7 +100,7 @@ export function buildRadialForest(ids: string[], links: ReadonlyMap<string, read
     }
     trees.sort((a, b) => b.positions.size - a.positions.size || b.radius - a.radius);
     const main = trees.shift();
-    if (!main) return { parents, positions: new Map<string, Point>() };
+    if (!main) return { parents, positions: new Map<string, Point>(), tiers, descendants };
 
     const positions = main.positions;
     trees.sort((a, b) => b.radius - a.radius);
@@ -111,6 +124,45 @@ export function buildRadialForest(ids: string[], links: ReadonlyMap<string, read
         outerEdge = ring + largest;
         rotation += Math.PI * (3 - Math.sqrt(5));
     }
-    return { parents, positions };
+    return { parents, positions, tiers, descendants };
+}
+
+function indexParents(children: ReadonlyMap<string, readonly string[]>) {
+    const parentsByChild = new Map<string, Set<string>>();
+    for (const [parent, ids] of children) {
+        for (const child of ids) {
+            if (!parentsByChild.has(child)) parentsByChild.set(child, new Set());
+            parentsByChild.get(child)!.add(parent);
+        }
+    }
+    return parentsByChild;
+}
+
+export function selectAdditionalParents(
+    children: ReadonlyMap<string, readonly string[]>,
+    primaryParents: ReadonlyMap<string, string>,
+    tiers: ReadonlyMap<string, number>,
+    selection: RadialLinkSettings["parentSelection"],
+    candidates = children
+) {
+    const declaredParents = indexParents(children);
+    const eligibleParents = candidates === children ? declaredParents : indexParents(candidates);
+    const additionalParents = new Map<string, Set<string>>();
+    for (const [child, parents] of eligibleParents) {
+        const primary = primaryParents.get(child);
+        const expectedTier = tiers.get(child)! - 1;
+        const distance = (parent: string) => Math.abs(tiers.get(parent)! - expectedTier);
+        // The breadth-first tree parent always has distance zero. Roots can only have fallback links.
+        let bestDistance = primary !== undefined ? 0 : Infinity;
+        if (selection === "tier" && primary === undefined) {
+            for (const parent of parents) bestDistance = Math.min(bestDistance, distance(parent));
+        }
+        const additional = new Set<string>();
+        for (const parent of parents) {
+            if (parent !== primary && (selection !== "tier" || distance(parent) === bestDistance)) additional.add(parent);
+        }
+        if (additional.size) additionalParents.set(child, additional);
+    }
+    return { declaredParents, additionalParents };
 }
 

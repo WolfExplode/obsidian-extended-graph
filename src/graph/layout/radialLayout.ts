@@ -2,17 +2,18 @@ import { getLinkpath } from "obsidian";
 import type { GraphData } from "obsidian-typings";
 import { getFile } from "../../helpers/vault";
 import { ExtendedGraphInstances, type GraphInstances } from "../../pluginInstances";
-import { buildRadialForest } from "./radialTree";
+import type { RadialLinkSettings } from "../../settings/settings";
+import { buildRadialForest, selectAdditionalParents } from "./radialTree";
 import { RadialPhysics } from "./radialPhysics";
 
 type Position = { x: number; y: number };
+export const DEFAULT_RADIAL_SPACING = 220;
 
 export class RadialLayout {
     active = false;
-    hierarchy: "parents" | "outgoing" = "parents";
-    spacing = 220;
-    showCrossLinks = false;
+    spacing = DEFAULT_RADIAL_SPACING;
     private positions = new Map<string, Position>();
+    private descendants = new Map<string, number>();
     private physics = new RadialPhysics();
     private camera?: { x: number; y: number; scale: number };
     private mutedWorker?: { worker: Worker; onMessage: Worker["onmessage"] };
@@ -23,6 +24,12 @@ export class RadialLayout {
     get animate() {
         const win = this.instances.renderer.interactiveEl.ownerDocument.defaultView;
         return ExtendedGraphInstances.settings.radialMotion ?? !win?.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    }
+
+    getDescendantCount(id: string): number | undefined {
+        if (ExtendedGraphInstances.settings.radialNodeSizing[this.instances.type] === "descendants") {
+            return this.descendants.get(id);
+        }
     }
 
     setAutomatic() {
@@ -59,31 +66,48 @@ export class RadialLayout {
         this.fitOnRender = false;
         this.active = false;
         this.positions.clear();
+        this.descendants.clear();
         this.physics = new RadialPhysics();
         renderer.changed();
     }
 
     filter(data: GraphData): GraphData {
         if (!this.active) return data;
-        let hierarchy = this.hierarchy;
-        let children = this.collectChildren(data.nodes, hierarchy);
+        const { radialLinks } = ExtendedGraphInstances.settings;
+        const linkSettings = radialLinks[this.instances.type];
+        let { hierarchy } = linkSettings;
+        const firstChildren = hierarchy === "parents" && linkSettings.parentSelection === "first"
+            ? new Map<string, string[]>() : undefined;
+        let children = this.collectChildren(data.nodes, hierarchy, firstChildren);
         if (hierarchy === "parents" && !children.size) {
             hierarchy = "outgoing";
             children = this.collectChildren(data.nodes, hierarchy);
         }
-        const { parents, positions } = buildRadialForest(Object.keys(data.nodes), children, this.spacing);
+        const candidates = hierarchy === "parents" && firstChildren ? firstChildren : children;
+        const { parents, positions, tiers, descendants } = buildRadialForest(Object.keys(data.nodes), candidates, this.spacing);
+        this.descendants = descendants;
+        const { additionalParents, declaredParents } = hierarchy === "parents"
+            ? selectAdditionalParents(children, parents, tiers, linkSettings.parentSelection, candidates)
+            : { additionalParents: new Map<string, Set<string>>(), declaredParents: undefined };
         if (!this.positions.size) this.fitOnRender = true;
         this.positions = positions;
-        this.physics.configure(positions, parents, this.spacing);
+        this.physics.configure(positions, parents, additionalParents, this.spacing);
+        const isParent = (child: string, parent: string) =>
+            parents.get(child) === parent || additionalParents.get(child)?.has(parent);
         const nodes: GraphData["nodes"] = Object.create(null);
         for (const id of positions.keys()) {
             const source = data.nodes[id];
             const links: typeof source.links = Object.create(null);
             for (const [target, value] of Object.entries(source.links)) {
                 if (!positions.has(target)) continue;
-                const preferredDirection = hierarchy === "parents" ? parents.get(id) === target : parents.get(target) === id;
-                const otherDirection = hierarchy === "parents" ? parents.get(target) === id : parents.get(id) === target;
-                if (this.showCrossLinks || preferredDirection || (otherDirection && !Object.hasOwn(data.nodes[target].links, id))) {
+                const preferredDirection = hierarchy === "parents" ? isParent(id, target) : isParent(target, id);
+                const otherDirection = hierarchy === "parents" ? isParent(target, id) : isParent(id, target);
+                const declaredDirection = declaredParents?.get(id)?.has(target);
+                const rejectedParent = !preferredDirection && (otherDirection
+                    ? firstChildren && declaredDirection && Object.hasOwn(data.nodes[target].links, id)
+                    : declaredDirection || declaredParents?.get(target)?.has(id));
+                if ((linkSettings.showCrossLinks && !rejectedParent) || preferredDirection ||
+                    (otherDirection && !Object.hasOwn(data.nodes[target].links, id))) {
                     links[target] = value;
                 }
             }
@@ -92,7 +116,9 @@ export class RadialLayout {
         return { ...data, nodes };
     }
 
-    private collectChildren(nodes: GraphData["nodes"], hierarchy: "parents" | "outgoing") {
+    private collectChildren(
+        nodes: GraphData["nodes"], hierarchy: RadialLinkSettings["hierarchy"], firstChildren?: Map<string, string[]>
+    ) {
         const children = new Map<string, string[]>();
         if (hierarchy === "outgoing") {
             for (const [id, node] of Object.entries(nodes)) {
@@ -105,16 +131,27 @@ export class RadialLayout {
             for (const id of Object.keys(nodes)) {
                 const file = getFile(id);
                 const links = file && metadataCache.getFileCache(file)?.frontmatterLinks;
-                for (const link of links || []) {
+                if (!links?.length) continue;
+                // Obsidian uses an unsuffixed key for a scalar and a zero-based suffix for a list.
+                const firstLink = firstChildren && links.find(link => /^parent(?:\.0)?$/i.test(link.key));
+                const seenParents = new Set<string>();
+                for (const link of links) {
                     if (link.key.split(".")[0].toLowerCase() !== "parent") continue;
                     const parent = metadataCache.getFirstLinkpathDest(getLinkpath(link.link), id)?.path;
-                    if (!parent || !Object.hasOwn(nodes, parent)) continue;
+                    if (!parent || parent === id || !Object.hasOwn(nodes, parent)) continue;
                     if (!Object.hasOwn(nodes[id].links, parent) && !Object.hasOwn(nodes[parent].links, id)) continue;
+                    if (firstChildren && link === firstLink) {
+                        if (!firstChildren.has(parent)) firstChildren.set(parent, []);
+                        firstChildren.get(parent)!.push(id);
+                    }
+                    if (seenParents.has(parent)) continue;
+                    seenParents.add(parent);
                     if (!children.has(parent)) children.set(parent, []);
                     children.get(parent)!.push(id);
                 }
             }
             for (const ids of children.values()) ids.sort();
+            if (firstChildren) for (const ids of firstChildren.values()) ids.sort();
         }
         return children;
     }

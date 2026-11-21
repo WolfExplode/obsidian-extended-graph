@@ -1,3 +1,5 @@
+import { resetValue } from "../resetControl";
+import { DEFAULT_SETTINGS } from "../settings";
 import { Setting } from "obsidian";
 import { Feature, graphTypeLabels, ExtendedGraphInstances } from "../../internal";
 
@@ -9,7 +11,7 @@ export class FeatureSetting extends Setting {
 
         this.addToggle(cb => {
             cb.toggleEl.insertAdjacentText('beforebegin', graphTypeLabels['graph']);
-            cb.setValue(ExtendedGraphInstances.settings.enableFeatures['graph'][feature]);
+            cb.setValue(ExtendedGraphInstances.settings.enableFeatures['graph'][feature]).then(control => resetValue(control, DEFAULT_SETTINGS.enableFeatures['graph'][feature]));
             cb.onChange(value => {
                 ExtendedGraphInstances.settings.enableFeatures['graph'][feature] = value;
                 ExtendedGraphInstances.plugin.saveSettings();
@@ -17,7 +19,7 @@ export class FeatureSetting extends Setting {
         })
             .addToggle(cb => {
                 cb.toggleEl.insertAdjacentText('beforebegin', graphTypeLabels['localgraph']);
-                cb.setValue(ExtendedGraphInstances.settings.enableFeatures['localgraph'][feature]);
+                cb.setValue(ExtendedGraphInstances.settings.enableFeatures['localgraph'][feature]).then(control => resetValue(control, DEFAULT_SETTINGS.enableFeatures['localgraph'][feature]));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.enableFeatures['localgraph'][feature] = value;
                     ExtendedGraphInstances.plugin.saveSettings();

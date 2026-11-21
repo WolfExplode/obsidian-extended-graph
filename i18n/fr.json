@@ -23,10 +23,24 @@
         "animate": "Animer la mise en place des branches",
         "heading": "Disposition",
         "hierarchy": "Former les branches avec",
+        "hierarchyDesc": "La propriété Parent définit les branches. Si aucun lien de parenté n’est visible, les branches suivent les liens sortants.",
         "parentLinks": "Propriété Parent",
         "outgoingLinks": "Liens sortants",
+        "parentSelection": "Liens de parenté à garder",
+        "parentSelectionDesc": "Le niveau le plus proche garde les parents les plus proches du niveau juste au-dessus de l’enfant, y compris les ex æquo. Premier de la liste utilise uniquement la première entrée de Parent. Si elle est indisponible, les suivantes sont ignorées.",
+        "closestTier": "Niveau le plus proche",
+        "firstParent": "Premier de la liste",
+        "allParents": "Tous les parents",
         "spacing": "Espacement des branches",
-        "crossLinks": "Afficher les liens transversaux"
+        "crossLinks": "Afficher les liens transversaux",
+        "crossLinksDesc": "Affiche les autres liens entre les notes visibles. La règle de sélection des parents s’applique toujours."
+    },
+    "nodeWeight": {
+        "source": "Source du poids",
+        "sourceHelp": "Utilise les notes liées ou compte tous les descendants visibles dans l’arbre radial. Sans disposition radiale, utilise les notes liées.",
+        "linkedNotes": "Notes liées",
+        "descendants": "Descendants",
+        "descendantEquation": "Poids du nœud = descendants"
     },
     "graphSearch": {
         "filterPlaceholder": "Filtrer par texte ou requête…",

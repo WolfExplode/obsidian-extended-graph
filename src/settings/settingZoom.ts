@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSection, t } from "../internal";
 
@@ -19,7 +21,7 @@ export class SettingZoom extends SettingsSection {
                     cb.sliderEl.parentElement?.insertBefore(preview, cb.sliderEl);
                 }
                 cb.setLimits(0, 8, 0.5)
-                    .setValue(ExtendedGraphInstances.settings.zoomFactor)
+                    .setValue(ExtendedGraphInstances.settings.zoomFactor).then(control => resetValue(control, DEFAULT_SETTINGS.zoomFactor))
                     .onChange(value => {
                         ExtendedGraphInstances.settings.zoomFactor = value;
                         if (preview) preview.textContent = ExtendedGraphInstances.settings.zoomFactor.toString();

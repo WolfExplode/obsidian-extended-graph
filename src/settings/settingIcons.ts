@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSectionPerGraphType, t } from "../internal";
 import { SettingMultiPropertiesModal } from "../ui/modals/settingPropertiesModal";
@@ -27,6 +29,10 @@ export class SettingIcons extends SettingsSectionPerGraphType {
                 .setDesc(t("features.iconPropertiesDesc"))
                 .addExtraButton(cb => {
                     cb.setIcon('mouse-pointer-click');
+                    onMiddleClickReset(cb.extraSettingsEl, () => {
+                        ExtendedGraphInstances.settings.iconProperties = [...DEFAULT_SETTINGS.iconProperties];
+                        void ExtendedGraphInstances.plugin.saveSettings();
+                    });
                     cb.onClick(() => {
                         const modal = new SettingMultiPropertiesModal(
                             t("features.iconProperties"),
@@ -46,7 +52,7 @@ export class SettingIcons extends SettingsSectionPerGraphType {
                 .setName(t("features.iconUsePlugin"))
                 .setDesc(t("features.iconUsePluginDesc"))
                 .addToggle(cb => {
-                    cb.setValue(ExtendedGraphInstances.settings.usePluginForIcon);
+                    cb.setValue(ExtendedGraphInstances.settings.usePluginForIcon).then(control => resetValue(control, DEFAULT_SETTINGS.usePluginForIcon));
                     cb.onChange((value) => {
                         ExtendedGraphInstances.settings.usePluginForIcon = value;
                         ExtendedGraphInstances.plugin.saveSettings();
@@ -60,7 +66,7 @@ export class SettingIcons extends SettingsSectionPerGraphType {
             .setName(t("features.iconUsePluginColor"))
             .setDesc(t("features.iconUsePluginColorDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.usePluginForIconColor);
+                cb.setValue(ExtendedGraphInstances.settings.usePluginForIconColor).then(control => resetValue(control, DEFAULT_SETTINGS.usePluginForIconColor));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.usePluginForIconColor = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -73,7 +79,7 @@ export class SettingIcons extends SettingsSectionPerGraphType {
             .setName(t("features.iconUseParentIcon"))
             .setDesc(t("features.iconUseParentIconDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.useParentIcon);
+                cb.setValue(ExtendedGraphInstances.settings.useParentIcon).then(control => resetValue(control, DEFAULT_SETTINGS.useParentIcon));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.useParentIcon = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -90,7 +96,7 @@ export class SettingIcons extends SettingsSectionPerGraphType {
                 .setDesc(t("features.iconBackgroundOpacityDesc"))
                 .addText(cb => {
                     cb.inputEl.addClass("number");
-                    cb.setValue(ExtendedGraphInstances.settings.backgroundOpacityWithIcon.toString());
+                    cb.setValue(ExtendedGraphInstances.settings.backgroundOpacityWithIcon.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.backgroundOpacityWithIcon.toString()));
                     cb.onChange(async (value) => {
                         const floatValue = value === "" ? 0 : parseFloat(value);
                         if (!isNaN(floatValue)) {
@@ -105,7 +111,7 @@ export class SettingIcons extends SettingsSectionPerGraphType {
                 .setName(t("features.iconBackgroundColor"))
                 .setDesc(t("features.iconBackgroundColorDesc"))
                 .addToggle(cb => {
-                    cb.setValue(ExtendedGraphInstances.settings.useIconColorForBackgroud);
+                    cb.setValue(ExtendedGraphInstances.settings.useIconColorForBackgroud).then(control => resetValue(control, DEFAULT_SETTINGS.useIconColorForBackgroud));
                     cb.onChange(async (value) => {
                         ExtendedGraphInstances.settings.useIconColorForBackgroud = value;
                         await ExtendedGraphInstances.plugin.saveSettings();
@@ -121,7 +127,7 @@ export class SettingIcons extends SettingsSectionPerGraphType {
                 .setDesc(t("features.iconBorderWidthDesc"))
                 .addText(cb => {
                     cb.inputEl.addClass("number");
-                    cb.setValue(ExtendedGraphInstances.settings.borderWidthWithIcon.toString());
+                    cb.setValue(ExtendedGraphInstances.settings.borderWidthWithIcon.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.borderWidthWithIcon.toString()));
                     cb.onChange(async (value) => {
                         const floatValue = value === "" ? 0 : parseFloat(value);
                         if (!isNaN(floatValue)) {

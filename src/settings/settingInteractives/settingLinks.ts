@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "../resetControl";
+import { DEFAULT_SETTINGS } from "../settings";
 import { ButtonComponent, Setting } from "obsidian";
 import {
     canonicalizeVarName,
@@ -37,6 +39,11 @@ export class SettingLinks extends SettingInteractives {
             .setDesc(t("features.excludeSourceFoldersDesc"))
             .addButton(cb => {
                 this.setManageNumber(cb, ExtendedGraphInstances.settings.excludedSourcesFolder.length);
+                onMiddleClickReset(cb.buttonEl, () => {
+                    ExtendedGraphInstances.settings.excludedSourcesFolder = [...DEFAULT_SETTINGS.excludedSourcesFolder];
+                    this.setManageNumber(cb, ExtendedGraphInstances.settings.excludedSourcesFolder.length);
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new ExcludeFoldersModal(ExtendedGraphInstances.settings.excludedSourcesFolder);
                     modal.open();
@@ -49,6 +56,11 @@ export class SettingLinks extends SettingInteractives {
             .setDesc(t("features.excludeTargetFoldersDesc"))
             .addButton(cb => {
                 this.setManageNumber(cb, ExtendedGraphInstances.settings.excludedTargetsFolder.length);
+                onMiddleClickReset(cb.buttonEl, () => {
+                    ExtendedGraphInstances.settings.excludedTargetsFolder = [...DEFAULT_SETTINGS.excludedTargetsFolder];
+                    this.setManageNumber(cb, ExtendedGraphInstances.settings.excludedTargetsFolder.length);
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new ExcludeFoldersModal(ExtendedGraphInstances.settings.excludedTargetsFolder);
                     modal.open();
@@ -66,7 +78,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.linksAllowMultipleTypes"))
             .setDesc(t("features.linksAllowMultipleTypesDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.allowMultipleLinkTypes);
+                cb.setValue(ExtendedGraphInstances.settings.allowMultipleLinkTypes).then(control => resetValue(control, DEFAULT_SETTINGS.allowMultipleLinkTypes));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.allowMultipleLinkTypes = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -79,7 +91,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.removeSources"))
             .setDesc(t("features.removeSourcesDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.disableSource);
+                cb.setValue(ExtendedGraphInstances.settings.disableSource).then(control => resetValue(control, DEFAULT_SETTINGS.disableSource));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.disableSource = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -92,7 +104,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.removeTargets"))
             .setDesc(t("features.removeTargetsDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.disableTarget);
+                cb.setValue(ExtendedGraphInstances.settings.disableTarget).then(control => resetValue(control, DEFAULT_SETTINGS.disableTarget));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.disableTarget = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -105,7 +117,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.interactives.colorLinks"))
             .setDesc(t("features.interactives.colorLinksDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].showOnGraph);
+                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].showOnGraph).then(control => resetValue(control, DEFAULT_SETTINGS.interactiveSettings[this.interactiveKey].showOnGraph));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].showOnGraph = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -116,7 +128,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.interactives.displayLinkTypeLabel"))
             .setDesc(t("features.interactives.displayLinkTypeLabelDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.displayLinkTypeLabel);
+                cb.setValue(ExtendedGraphInstances.settings.displayLinkTypeLabel).then(control => resetValue(control, DEFAULT_SETTINGS.displayLinkTypeLabel));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.displayLinkTypeLabel = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -127,7 +139,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.interactives.colorLinkTypeLabel"))
             .setDesc(t("features.interactives.colorLinkTypeLabelDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.colorLinkTypeLabel);
+                cb.setValue(ExtendedGraphInstances.settings.colorLinkTypeLabel).then(control => resetValue(control, DEFAULT_SETTINGS.colorLinkTypeLabel));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.colorLinkTypeLabel = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -140,7 +152,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.interactives.curvedLinks"))
             .setDesc(t("features.interactives.curvedLinksDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.curvedLinks);
+                cb.setValue(ExtendedGraphInstances.settings.curvedLinks).then(control => resetValue(control, DEFAULT_SETTINGS.curvedLinks));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.curvedLinks = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -156,7 +168,7 @@ export class SettingLinks extends SettingInteractives {
                     cb.sliderEl.parentElement?.insertBefore(preview, cb.sliderEl);
                 }
                 cb.setLimits(-2, 2, 0.2)
-                    .setValue(ExtendedGraphInstances.settings.curvedFactor)
+                    .setValue(ExtendedGraphInstances.settings.curvedFactor).then(control => resetValue(control, DEFAULT_SETTINGS.curvedFactor))
                     .onChange(value => {
                         ExtendedGraphInstances.settings.curvedFactor = value;
                         ExtendedGraphInstances.plugin.saveSettings();
@@ -170,7 +182,7 @@ export class SettingLinks extends SettingInteractives {
             .setName(t("features.linksOutline"))
             .setDesc(t("features.linksOutlineDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.outlineLinks);
+                cb.setValue(ExtendedGraphInstances.settings.outlineLinks).then(control => resetValue(control, DEFAULT_SETTINGS.outlineLinks));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.outlineLinks = value;
                     ExtendedGraphInstances.plugin.saveSettings();

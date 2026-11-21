@@ -1,5 +1,7 @@
 import { ExtraButtonComponent, Setting } from "obsidian";
 import { ExtendedGraphSettingTab, NodeShape, ExtendedGraphInstances, QueryData, QueryMatcher, SettingsSectionPerGraphType, ShapeEnum, ShapeQueryModal, t } from "../internal";
+import { onMiddleClickReset } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 
 export class SettingShapes extends SettingsSectionPerGraphType {
     settingsShape: SettingShape[] = [];
@@ -73,6 +75,7 @@ class SettingShape extends Setting {
             .addQueryStringDiv()
             .addSVG()
             .addEditButton();
+        onMiddleClickReset(this.settingEl, () => this.saveShapeQuery(shape, structuredClone(DEFAULT_SETTINGS.shapeQueries[shape])));
     }
 
     private addQueryStringDiv(): SettingShape {

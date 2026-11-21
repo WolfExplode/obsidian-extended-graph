@@ -276,28 +276,23 @@ export class ExtendedGraphText {
         node.text.position._y = value;
     }
 
-    // ================== Increase alpha of connected nodes
+    // ================== Fade labels by distance from the highlighted node
 
-    // Called on each render frame, from the dispatcher
-
-    makeVisibleIfNeighborHighlighted(): void {
+    applyHoverOpacity(): void {
         const text = this.coreElement.text;
         if (!text) return;
 
         const renderer = this.coreElement.renderer;
-        // At 0, the threshold should be 0.1 (https://github.com/ElsaTam/obsidian-extended-graph/issues/79#issuecomment-2934788603)
-        if (renderer.scale < renderer.fTextShowMult + 0.1) return;
+        const revealNeighbor = this.instances.settings.enableFeatures[this.instances.type].names &&
+            this.instances.settings.showNamesWhenNeighborHighlighted && renderer.scale >= renderer.fTextShowMult + 0.1;
+        if (!text.visible && (!revealNeighbor || !this.coreElement.circle?.visible)) return;
 
-        const highlightNode = renderer.getHighlightNode();
-        if (!highlightNode) return;
+        const distance = this.instances.nodesSet.getHoverDistance(this.coreElement);
+        if (!distance) return;
 
-        if (!this.coreElement.forward.hasOwnProperty(highlightNode.id) && !this.coreElement.reverse.hasOwnProperty(highlightNode.id)) {
-            return;
-        }
-
-        text.alpha = 1;
-
-        if (!text.visible) { // Text not visible means that position and scale where not computed
+        if (!text.visible) {
+            if (distance !== 1) return;
+            // The native renderer skips label positioning and scaling when the label is hidden.
             text.visible = true;
             text.position.set(
                 this.coreElement.x,
@@ -305,5 +300,7 @@ export class ExtendedGraphText {
             );
             text.scale.set(renderer.scale < 1 ? 1 / renderer.scale : renderer.nodeScale);
         }
+        const opacity = distance === 1 ? 1 : distance === 2 ? 0.6 : 0.32;
+        text.alpha = opacity * renderer.colors.text.a;
     }
 }

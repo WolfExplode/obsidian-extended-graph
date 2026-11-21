@@ -1,5 +1,6 @@
 import { ExtraButtonComponent, setIcon, Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, t } from "../internal";
+import { onMiddleClickReset } from "./resetControl";
 
 export abstract class SettingsSection {
     settingTab: ExtendedGraphSettingTab;
@@ -66,6 +67,7 @@ export abstract class SettingsSection {
             })
             .then((btn) => {
                 btn.extraSettingsEl.addClass("setting-header-fold-icon");
+                onMiddleClickReset(btn.extraSettingsEl, () => this.id === "property-key" ? this.expand() : this.collapse());
             });
 
         this.settingHeader.setDesc(this.description);

@@ -1,6 +1,7 @@
 import { Setting, ToggleComponent } from "obsidian";
 import * as Color from '../../colors/color-bits';
 import { CSSBridge, FOLDER_KEY, GCSection, GraphInstances, InteractiveManager, InteractiveUI, t } from "../../internal";
+import { resetValue } from "../../settings/resetControl";
 
 export class GCFolders extends GCSection implements InteractiveUI {
     foldersManager: InteractiveManager;
@@ -88,6 +89,7 @@ export class GCFolders extends GCSection implements InteractiveUI {
         setting.setName(path)
             .addToggle(cb => {
                 cb.setValue(this.foldersManager.isActive(path))
+                    .then(control => resetValue(control, this.foldersManager.instances.settings.interactiveSettings[FOLDER_KEY].enableByDefault))
                 cb.onChange(enable => {
                     if (enable !== this.foldersManager.isActive(path)) {
                         this.toggle(key, path);

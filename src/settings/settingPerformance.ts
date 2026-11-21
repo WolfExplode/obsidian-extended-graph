@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { CSSSnippetsSuggester, ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSection, t } from "../internal";
 
@@ -20,7 +22,7 @@ export class SettingPerformance extends SettingsSection {
             .setDesc(t("features.performanceDelayDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.delay.toString())
+                cb.setValue(ExtendedGraphInstances.settings.delay.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.delay.toString()))
                     .onChange(async (value) => {
                         const intValue = parseInt(value);
                         if (!isNaN(intValue)) {
@@ -39,7 +41,7 @@ export class SettingPerformance extends SettingsSection {
             .setDesc(t("features.performanceMaxNodesDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.maxNodes.toString())
+                cb.setValue(ExtendedGraphInstances.settings.maxNodes.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.maxNodes.toString()))
                     .onChange(async (value) => {
                         const intValue = parseInt(value);
                         if (!isNaN(intValue)) {
@@ -57,13 +59,13 @@ export class SettingPerformance extends SettingsSection {
             .setName(t("beta.enableCSS"))
             .setDesc(t("beta.enableCSSDesc"))
             .addToggle(cb => cb
-                .setValue(ExtendedGraphInstances.settings.enableCSS)
+                .setValue(ExtendedGraphInstances.settings.enableCSS).then(control => resetValue(control, DEFAULT_SETTINGS.enableCSS))
                 .onChange(value => {
                     ExtendedGraphInstances.settings.enableCSS = value;
                     ExtendedGraphInstances.plugin.saveSettings();
                 }))
             .addSearch(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.cssSnippetFilename);
+                cb.setValue(ExtendedGraphInstances.settings.cssSnippetFilename).then(control => resetValue(control, DEFAULT_SETTINGS.cssSnippetFilename));
                 new CSSSnippetsSuggester(cb.inputEl, (value: string) => {
                     ExtendedGraphInstances.settings.cssSnippetFilename = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -82,7 +84,7 @@ export class SettingPerformance extends SettingsSection {
             .setName(t("features.interactives.linksLabelsUseBitmaps"))
             .setDesc(t("features.interactives.linksLabelsUseBitmapsDesc"))
             .addToggle(cb => cb
-                .setValue(ExtendedGraphInstances.settings.useBitmapsForLinkLabels)
+                .setValue(ExtendedGraphInstances.settings.useBitmapsForLinkLabels).then(control => resetValue(control, DEFAULT_SETTINGS.useBitmapsForLinkLabels))
                 .onChange(value => {
                     ExtendedGraphInstances.settings.useBitmapsForLinkLabels = value;
                     ExtendedGraphInstances.plugin.saveSettings();

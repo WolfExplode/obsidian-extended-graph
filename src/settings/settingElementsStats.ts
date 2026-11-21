@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { DropdownComponent, Notice, setIcon, Setting } from "obsidian";
 import {
     ExtendedGraphSettingTab,
@@ -62,6 +64,10 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
             .setDesc(t("features.nodeSizePropertiesDesc"))
             .addExtraButton(cb => {
                 cb.setIcon('mouse-pointer-click');
+                onMiddleClickReset(cb.extraSettingsEl, () => {
+                    ExtendedGraphInstances.settings.nodesSizeProperties = [...DEFAULT_SETTINGS.nodesSizeProperties];
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new SettingMultiPropertiesModal(
                         t("features.nodeSizeProperties"),
@@ -90,7 +96,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
                             return true;
                         })
                     ));
-                cb.setValue(ExtendedGraphInstances.settings.nodesSizeFunction);
+                cb.setValue(ExtendedGraphInstances.settings.nodesSizeFunction).then(control => resetValue(control, DEFAULT_SETTINGS.nodesSizeFunction));
                 cb.onChange((value) => {
                     let functionKey = value as NodeStatFunction;
                     if (!getNLPPlugin() && nodeStatFunctionNeedsNLP[functionKey]) {
@@ -126,7 +132,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
             .setDesc(t("features.nodeSizesRangeDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.nodesSizeRange.min.toString());
+                cb.setValue(ExtendedGraphInstances.settings.nodesSizeRange.min.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.nodesSizeRange.min.toString()));
                 cb.onChange(async (value) => {
                     const floatValue = parseFloat(value);
                     if (!isNaN(floatValue)) {
@@ -137,7 +143,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
             })
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.nodesSizeRange.max.toString());
+                cb.setValue(ExtendedGraphInstances.settings.nodesSizeRange.max.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.nodesSizeRange.max.toString()));
                 cb.onChange(async (value) => {
                     const floatValue = parseFloat(value);
                     if (!isNaN(floatValue)) {
@@ -165,7 +171,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
                             return true;
                         })
                     ));
-                cb.setValue(ExtendedGraphInstances.settings.nodesColorFunction);
+                cb.setValue(ExtendedGraphInstances.settings.nodesColorFunction).then(control => resetValue(control, DEFAULT_SETTINGS.nodesColorFunction));
                 cb.onChange((value) => {
                     let functionKey = value as NodeStatFunction;
                     if (!getNLPPlugin() && nodeStatFunctionNeedsNLP[functionKey]) {
@@ -206,7 +212,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
                     undirected: t("features.nodeStatsDirectionUndirected"),
                 };
                 cb.addOptions(options);
-                cb.setValue(ExtendedGraphInstances.settings.graphStatsDirection);
+                cb.setValue(ExtendedGraphInstances.settings.graphStatsDirection).then(control => resetValue(control, DEFAULT_SETTINGS.graphStatsDirection));
                 cb.onChange(async (value) => {
                     ExtendedGraphInstances.settings.graphStatsDirection = value as GraphStatsDirection;
                     await ExtendedGraphInstances.plugin.saveSettings();
@@ -217,7 +223,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
     }
 
     private addColorPaletteSettingForNodes(): void {
-        this.nodesPaletteSetting = new SettingColorPalette(this.containerEl, this.settingTab, 'stats-colors-nodes')
+        this.nodesPaletteSetting = new SettingColorPalette(this.containerEl, this.settingTab, 'stats-colors-nodes', DEFAULT_SETTINGS.nodesColorColormap)
             .setDesc(t("features.nodeColorsPaletteDesc"));
 
         this.nodesPaletteSetting.setValue(ExtendedGraphInstances.settings.nodesColorColormap);
@@ -249,7 +255,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
                         })
                     )
                 );
-                cb.setValue(ExtendedGraphInstances.settings.linksSizeFunction);
+                cb.setValue(ExtendedGraphInstances.settings.linksSizeFunction).then(control => resetValue(control, DEFAULT_SETTINGS.linksSizeFunction));
                 cb.onChange((value) => {
                     this.recomputeLinksSizes(value as LinkStatFunction);
                 });
@@ -274,7 +280,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
                         })
                     )
                 );
-                cb.setValue(ExtendedGraphInstances.settings.linksColorFunction);
+                cb.setValue(ExtendedGraphInstances.settings.linksColorFunction).then(control => resetValue(control, DEFAULT_SETTINGS.linksColorFunction));
                 cb.onChange((value) => {
                     this.recomputeLinksColors(value as LinkStatFunction);
                 });
@@ -284,7 +290,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
     }
 
     private addColorPaletteSettingForLinks(): void {
-        this.linksPaletteSetting = new SettingColorPalette(this.containerEl, this.settingTab, 'stats-colors-links')
+        this.linksPaletteSetting = new SettingColorPalette(this.containerEl, this.settingTab, 'stats-colors-links', DEFAULT_SETTINGS.linksColorColormap)
             .setDesc(t("features.linkColorsPaletteDesc"));
 
         this.linksPaletteSetting.setValue(ExtendedGraphInstances.settings.linksColorColormap);
@@ -305,7 +311,7 @@ export class SettingElementsStats extends SettingsSectionPerGraphType {
             .setName(t("features.nodeStatsRecomputeOnGraphChange"))
             .setDesc(t("features.nodeStatsRecomputeOnGraphChangeDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.recomputeStatsOnGraphChange);
+                cb.setValue(ExtendedGraphInstances.settings.recomputeStatsOnGraphChange).then(control => resetValue(control, DEFAULT_SETTINGS.recomputeStatsOnGraphChange));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.recomputeStatsOnGraphChange = value;
                     ExtendedGraphInstances.plugin.saveSettings();

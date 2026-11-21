@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Notice, PluginSettingTab, Setting, ToggleComponent } from "obsidian";
 import {
     ExportConfigModal,
@@ -163,7 +165,7 @@ export class ExtendedGraphSettingTab extends PluginSettingTab {
             .setName(t("features.disableNodes"))
             .setDesc(t("features.disableNodesDesc"))
             .addToggle(cb => {
-                cb.setValue(!ExtendedGraphInstances.settings.fadeOnDisable);
+                cb.setValue(!ExtendedGraphInstances.settings.fadeOnDisable).then(control => resetValue(control, !DEFAULT_SETTINGS.fadeOnDisable));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.fadeOnDisable = !value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -177,7 +179,7 @@ export class ExtendedGraphSettingTab extends PluginSettingTab {
                 .setName(t("features.canonicalizePropertiesWithDataview"))
                 .setDesc(t("features.canonicalizePropertiesWithDataviewDesc"))
                 .addToggle(cb => {
-                    cb.setValue(ExtendedGraphInstances.settings.canonicalizePropertiesWithDataview);
+                    cb.setValue(ExtendedGraphInstances.settings.canonicalizePropertiesWithDataview).then(control => resetValue(control, DEFAULT_SETTINGS.canonicalizePropertiesWithDataview));
                     cb.onChange(value => {
                         ExtendedGraphInstances.settings.canonicalizePropertiesWithDataview = value;
                         ExtendedGraphInstances.plugin.saveSettings();

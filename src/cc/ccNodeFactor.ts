@@ -202,8 +202,9 @@ export class CCNodeFactor {
     }
 
     /** Called by the node size hook. undefined = keep the native size. */
-    static sizeFor(id: string): number | undefined {
-        if (!this.isEnabled()) return undefined;
+    static sizeFor(id: string, descendantCount?: number): number | undefined {
+        if (!this.isEnabled()) return;
+        if (descendantCount !== undefined) return nodeFactorSize(descendantCount, this.settings);
         return this.results().get(id)?.size;
     }
 

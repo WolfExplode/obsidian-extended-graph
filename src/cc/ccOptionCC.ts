@@ -7,6 +7,7 @@
  *   Neighbor links ON = also show links between the kept notes that are not on a jump path.
  * Applied on the graph data after Obsidian's search filter (graphEventsDispatcher.updateData).
  */
+import { resetValue } from "../settings/resetControl";
 import { App, Component, debounce, Plugin, setIcon, setTooltip, SliderComponent, ToggleComponent } from "obsidian";
 import type { GraphData, GraphView, LocalGraphView } from "obsidian-typings";
 import { addHeaderToggle, HeaderToggle } from "./ccPanel";
@@ -207,7 +208,7 @@ export class CCOptionCCSection extends Component {
         dh.createSpan({ cls: "graphview-cc-nf-spacer" });
         const dv = dh.createSpan({ cls: "graphview-cc-nf-value", text: String(s.depth) });
         const db = dr.createDiv({ cls: "graphview-cc-nf-body" });
-        new SliderComponent(db).setLimits(1, 5, 1).setValue(s.depth).onChange(v => {
+        new SliderComponent(db).setLimits(1, 5, 1).setValue(s.depth).then(control => resetValue(control, OPTIONCC_DEFAULTS.depth)).onChange(v => {
             s.depth = v; dv.setText(String(v)); this.changed();
         }).sliderEl.addClass("graphview-cc-nf-slider");
 
@@ -223,7 +224,7 @@ export class CCOptionCCSection extends Component {
         h.createSpan({ cls: "graphview-cc-nf-label", text: label });
         helpIcon(h, HELP[key]);
         h.createSpan({ cls: "graphview-cc-nf-spacer" });
-        new ToggleComponent(h).setValue(CCOptionCC.settings[key]).onChange(v => {
+        new ToggleComponent(h).setValue(CCOptionCC.settings[key]).then(control => resetValue(control, OPTIONCC_DEFAULTS[key])).onChange(v => {
             CCOptionCC.settings[key] = v; this.changed();
         });
     }

@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExternalLinkOption, ExtendedGraphInstances, SettingMultiPropertiesModal, SettingsSection, t, ExternalLinkOpenMode } from "../internal";
 
@@ -17,7 +19,7 @@ export class SettingBeta extends SettingsSection {
             .setName(t("beta.revertAction"))
             .setDesc(t("beta.revertActionDesc"))
             .addToggle(cb => cb
-                .setValue(ExtendedGraphInstances.settings.revertAction)
+                .setValue(ExtendedGraphInstances.settings.revertAction).then(control => resetValue(control, DEFAULT_SETTINGS.revertAction))
                 .onChange(async (value) => {
                     ExtendedGraphInstances.settings.revertAction = value;
                     await ExtendedGraphInstances.plugin.saveSettings();
@@ -39,7 +41,7 @@ export class SettingBeta extends SettingsSection {
                     domain_and_href: t("features.externalLinksOptions.domain_and_href")
                 };
                 cb.addOptions(options);
-                cb.setValue(ExtendedGraphInstances.settings.externalLinks);
+                cb.setValue(ExtendedGraphInstances.settings.externalLinks).then(control => resetValue(control, DEFAULT_SETTINGS.externalLinks));
                 cb.onChange(async (value) => {
                     ExtendedGraphInstances.settings.externalLinks = value as ExternalLinkOption;
                     await ExtendedGraphInstances.plugin.saveSettings();
@@ -51,6 +53,10 @@ export class SettingBeta extends SettingsSection {
             .setDesc(t("features.externalLinksPropertiesDesc"))
             .addExtraButton(cb => {
                 cb.setIcon('mouse-pointer-click');
+                onMiddleClickReset(cb.extraSettingsEl, () => {
+                    ExtendedGraphInstances.settings.externalLinksProperties = [...DEFAULT_SETTINGS.externalLinksProperties];
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new SettingMultiPropertiesModal(
                         t("features.externalLinksProperties"),
@@ -72,7 +78,7 @@ export class SettingBeta extends SettingsSection {
                     choice: t("features.externalLinksModes.choice"),
                 };
                 cb.addOptions(options);
-                cb.setValue(ExtendedGraphInstances.settings.externalLinkOpenMode);
+                cb.setValue(ExtendedGraphInstances.settings.externalLinkOpenMode).then(control => resetValue(control, DEFAULT_SETTINGS.externalLinkOpenMode));
                 cb.onChange(async (value) => {
                     ExtendedGraphInstances.settings.externalLinkOpenMode = value as ExternalLinkOpenMode;
                     await ExtendedGraphInstances.plugin.saveSettings();

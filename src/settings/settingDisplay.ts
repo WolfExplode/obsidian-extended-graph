@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, FeatureSetting, ExtendedGraphInstances, SettingsSection, t } from "../internal";
 
@@ -28,7 +30,7 @@ export class SettingDisplay extends SettingsSection {
             .setDesc(t("features.borderUnresolvedDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.borderUnresolved.toString())
+                cb.setValue(ExtendedGraphInstances.settings.borderUnresolved.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.borderUnresolved.toString()))
                     .onChange(async (value) => {
                         if (value === '') {
                             ExtendedGraphInstances.settings.borderUnresolved = '';
@@ -57,7 +59,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("features.noLineHighlight"))
             .setDesc(t("features.noLineHighlightDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.noLineHighlight || false);
+                cb.setValue(ExtendedGraphInstances.settings.noLineHighlight || false).then(control => resetValue(control, DEFAULT_SETTINGS.noLineHighlight || false));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.noLineHighlight = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -70,7 +72,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("features.interactives.arcsSpread"))
             .setDesc(t("features.interactives.arcsSpreadDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.spreadArcs || false);
+                cb.setValue(ExtendedGraphInstances.settings.spreadArcs || false).then(control => resetValue(control, DEFAULT_SETTINGS.spreadArcs || false));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.spreadArcs = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -83,7 +85,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("features.interactives.arcWeight"))
             .setDesc(t("features.interactives.arcWeightDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.weightArcs || false);
+                cb.setValue(ExtendedGraphInstances.settings.weightArcs || false).then(control => resetValue(control, DEFAULT_SETTINGS.weightArcs || false));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.weightArcs = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -98,7 +100,7 @@ export class SettingDisplay extends SettingsSection {
             .addText(cb => {
                 cb.inputEl.addClass("number");
                 cb.inputEl.insertAdjacentText('beforebegin', t("plugin.light"));
-                cb.setValue(ExtendedGraphInstances.settings.interactivesBrightness.light.toString());
+                cb.setValue(ExtendedGraphInstances.settings.interactivesBrightness.light.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.interactivesBrightness.light.toString()));
                 cb.onChange(value => {
                     if (value === '') {
                         ExtendedGraphInstances.settings.interactivesBrightness.light = 1;
@@ -114,7 +116,7 @@ export class SettingDisplay extends SettingsSection {
             .addText(cb => {
                 cb.inputEl.addClass("number");
                 cb.inputEl.insertAdjacentText('beforebegin', t("plugin.dark"));
-                cb.setValue(ExtendedGraphInstances.settings.interactivesBrightness.dark.toString());
+                cb.setValue(ExtendedGraphInstances.settings.interactivesBrightness.dark.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.interactivesBrightness.dark.toString()));
                 cb.onChange(value => {
                     if (value === '') {
                         ExtendedGraphInstances.settings.interactivesBrightness.dark = 1;
@@ -135,7 +137,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("features.fadeInElements"))
             .setDesc(t("features.fadeInElementsDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.fadeInElements);
+                cb.setValue(ExtendedGraphInstances.settings.fadeInElements).then(control => resetValue(control, DEFAULT_SETTINGS.fadeInElements));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.fadeInElements = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -148,7 +150,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("features.animateDotsOnLinks"))
             .setDesc(t("features.animateDotsOnLinksDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.animateDotsOnLinks || false);
+                cb.setValue(ExtendedGraphInstances.settings.animateDotsOnLinks || false).then(control => resetValue(control, DEFAULT_SETTINGS.animateDotsOnLinks || false));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.animateDotsOnLinks = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -162,7 +164,7 @@ export class SettingDisplay extends SettingsSection {
             .setDesc(t("features.animateDotsOnLinksSpeedDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.animationSpeedForDots.toString())
+                cb.setValue(ExtendedGraphInstances.settings.animationSpeedForDots.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.animationSpeedForDots.toString()))
                     .onChange(async (value) => {
                         const floatValue = parseFloat(value);
                         if (!isNaN(floatValue) && floatValue > 0) {
@@ -178,7 +180,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("UI.horizontalLegend"))
             .setDesc(t("UI.horizontalLegendDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.horizontalLegend);
+                cb.setValue(ExtendedGraphInstances.settings.horizontalLegend).then(control => resetValue(control, DEFAULT_SETTINGS.horizontalLegend));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.horizontalLegend = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -191,7 +193,7 @@ export class SettingDisplay extends SettingsSection {
             .setName(t("UI.showPinIcon"))
             .setDesc(t("UI.showPinIconDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.showPinIcon);
+                cb.setValue(ExtendedGraphInstances.settings.showPinIcon).then(control => resetValue(control, DEFAULT_SETTINGS.showPinIcon));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.showPinIcon = value;
                     ExtendedGraphInstances.plugin.saveSettings();

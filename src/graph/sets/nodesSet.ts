@@ -24,6 +24,8 @@ import { OutlineFilter } from "@pixi/filter-outline";
 
 export class NodesSet extends AbstractSet<GraphNode> {
     extendedElementsMap: Map<string, ExtendedGraphNode>;
+    private hoverSource: GraphNode | null = null;
+    private hoverDistances = new Map<GraphNode, number>();
 
     selectedNodes: Record<string, { node: GraphNode, originX: number, originY: number }> = {};
     readonly selectionFilter: OutlineFilter;
@@ -49,6 +51,38 @@ export class NodesSet extends AbstractSet<GraphNode> {
     }
 
     // ================================ LOADING ================================
+
+    invalidateHoverDistances(): void {
+        this.hoverSource = null;
+        this.hoverDistances.clear();
+    }
+
+    getHoverDistance(node: GraphNode): number | undefined {
+        const source = this.instances.renderer.getHighlightNode();
+        if (source !== this.hoverSource) {
+            this.invalidateHoverDistances();
+            this.hoverSource = source;
+            if (source) {
+                // Follow both link directions and visit the nearest nodes first.
+                this.hoverDistances.set(source, 0);
+                let frontier = [source];
+                for (let distance = 1; distance <= 3 && frontier.length; distance++) {
+                    const next: GraphNode[] = [];
+                    const visit = (neighbor: GraphNode) => {
+                        if (this.hoverDistances.has(neighbor)) return;
+                        this.hoverDistances.set(neighbor, distance);
+                        next.push(neighbor);
+                    };
+                    for (const current of frontier) {
+                        for (const link of Object.values(current.forward)) visit(link.target);
+                        for (const link of Object.values(current.reverse)) visit(link.source);
+                    }
+                    frontier = next;
+                }
+            }
+        }
+        return this.hoverDistances.get(node);
+    }
 
     override load(id?: string) {
         if (this.instances.settings.externalLinks !== "none") {

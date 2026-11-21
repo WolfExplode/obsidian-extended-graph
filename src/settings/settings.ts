@@ -28,6 +28,12 @@ export type ExternalLinkOption = 'none' | 'domain' | 'href' | 'domain_and_href';
 export type ExternalLinkOpenMode = 'web' | 'note' | 'choice';
 export type NodesSelectionMode = 'replace' | 'add' | 'subtract' | 'intersect';
 export type GraphStatsDirection = 'normal' | 'reversed' | 'undirected';
+export type RadialNodeSizing = 'default' | 'descendants';
+export type RadialLinkSettings = {
+    hierarchy: 'parents' | 'outgoing';
+    parentSelection: 'tier' | 'all' | 'first';
+    showCrossLinks: boolean;
+};
 
 type InteractiveSettings = {
     colormap: string;
@@ -67,6 +73,8 @@ export interface ExtendedGraphSettings {
     // Graph settings
     backupGraphOptions: EngineOptions;
     radialAutoLayout: Record<GraphType, boolean>;
+    radialLinks: Record<GraphType, RadialLinkSettings>;
+    radialNodeSizing: Record<GraphType, RadialNodeSizing>;
     radialMotion: boolean | null;
     openInNewTab: boolean;
     canonicalizePropertiesWithDataview: boolean;
@@ -252,6 +260,11 @@ export const DEFAULT_STATE_SETTINGS: GraphStateData = {
 let shapeQueriesIndex = 0;
 export const DEFAULT_SETTINGS: ExtendedGraphSettings = {
     radialAutoLayout: { graph: false, localgraph: false },
+    radialLinks: {
+        graph: { hierarchy: 'parents', parentSelection: 'tier', showCrossLinks: false },
+        localgraph: { hierarchy: 'parents', parentSelection: 'tier', showCrossLinks: false },
+    },
+    radialNodeSizing: { graph: 'default', localgraph: 'default' },
     radialMotion: null,
     // Feature toggles
     enableFeatures: {

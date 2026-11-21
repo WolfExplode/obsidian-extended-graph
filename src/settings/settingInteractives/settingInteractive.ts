@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "../resetControl";
+import { DEFAULT_SETTINGS } from "../settings";
 import { ColorComponent, HexString, setIcon, Setting, TextComponent, ToggleComponent } from "obsidian";
 import {
     ExtendedGraphSettingTab,
@@ -58,7 +60,7 @@ export abstract class SettingInteractives extends SettingsSectionPerGraphType {
             .setName(t("features.interactives.noneTypeID"))
             .setDesc(t("features.interactives.noneTypeIDDesc") + this.interactiveKey)
             .addText(cb => cb
-                .setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].noneType)
+                .setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].noneType).then(control => resetValue(control, DEFAULT_SETTINGS.interactiveSettings[this.interactiveKey]?.noneType ?? "none"))
                 .onChange(async (value) => {
                     value = value.trim();
                     if (value == this.noneType) return;
@@ -81,7 +83,7 @@ export abstract class SettingInteractives extends SettingsSectionPerGraphType {
             .setName(t("features.interactives.undefinedTypeID"))
             .setDesc(t("features.interactives.undefinedTypeIDDesc") + this.interactiveKey)
             .addText(cb => cb
-                .setValue(settings.undefinedType ?? "undefined")
+                .setValue(settings.undefinedType ?? "undefined").then(control => resetValue(control, "undefined"))
                 .onChange(async (value) => {
                     value = value.trim();
                     if (value == this.undefinedType) return;
@@ -93,7 +95,8 @@ export abstract class SettingInteractives extends SettingsSectionPerGraphType {
     }
 
     protected addColorPaletteSetting(): void {
-        this.settingColorPalette = new SettingColorPalette(this.containerEl, this.settingTab, this.interactiveKey)
+        this.settingColorPalette = new SettingColorPalette(this.containerEl, this.settingTab, this.interactiveKey,
+            DEFAULT_SETTINGS.interactiveSettings[this.interactiveKey]?.colormap ?? "rainbow")
             .setDesc(t("features.interactives.paletteDesc") + this.interactiveKey);
 
         this.settingColorPalette.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].colormap);
@@ -116,6 +119,11 @@ export abstract class SettingInteractives extends SettingsSectionPerGraphType {
             .setDesc(t("features.interactives.specificColorsDesc"))
             .addButton(cb => {
                 UIElements.setupButton(cb, 'add');
+                onMiddleClickReset(cb.buttonEl, () => {
+                    for (const color of [...this.colors]) {
+                        if (color.settingEl.parentElement) color.remove();
+                    }
+                });
                 cb.onClick((e) => {
                     const data = { type: "", color: int2hex(randomColor()), recursive: this.canBeRecursive ? false : undefined };
                     ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].colors.push(data);
@@ -131,6 +139,13 @@ export abstract class SettingInteractives extends SettingsSectionPerGraphType {
             .setDesc(t("features.interactives.selectionDesc"))
             .addExtraButton(cb => {
                 cb.setIcon('mouse-pointer-click');
+                onMiddleClickReset(cb.extraSettingsEl, () => {
+                    const current = ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey];
+                    const defaults = DEFAULT_SETTINGS.interactiveSettings[this.interactiveKey];
+                    current.excludeRegex = structuredClone(defaults?.excludeRegex ?? { regex: "", flags: "" });
+                    current.unselected = [...(defaults?.unselected ?? [])];
+                    void ExtendedGraphInstances.plugin.saveSettings();
+                });
                 cb.onClick(() => {
                     const modal = new InteractivesSelectionModal(this.interactiveKey, this.getAllTypes());
                     modal.open();
@@ -274,7 +289,7 @@ export class SettingColor extends Setting {
             this.addToggle(cb => {
                 this.recursiveComponent = cb;
                 cb.toggleEl.insertAdjacentText("afterend", t("features.recursive"))
-                cb.setValue(recursive);
+                cb.setValue(recursive).then(control => resetValue(control, false));
                 cb.onChange((value) => {
                     this.save();
                 });
@@ -289,6 +304,7 @@ export class SettingColor extends Setting {
 
         this.updateCSS();
         this.settingEl.addClass('setting-color');
+        onMiddleClickReset(this.settingEl, () => this.remove());
     }
 
     private toggleWarning() {
@@ -321,7 +337,7 @@ export class SettingColor extends Setting {
         this.settingEl.style.setProperty("--interactive-color", this.colorComponent.getValue());
     }
 
-    protected remove() {
+    remove() {
         ExtendedGraphInstances.settings.interactiveSettings[this.key].colors.remove(this.data);
         ExtendedGraphInstances.plugin.saveSettings().then(() => {
             ExtendedGraphInstances.app.workspace.trigger(`extended-graph:settings-interactive-color-changed`, this.key, this.data.type);

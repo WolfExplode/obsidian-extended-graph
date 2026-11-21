@@ -13,6 +13,7 @@ import type { SearchEngineLike } from "./ccTypes";
 import { CCSettings } from "./ccSettings";
 import { CCLogger } from "./ccLogger";
 import { CCQuerySuggest } from "./ccQuerySuggest";
+import { onMiddleClickReset, resetValue } from "../settings/resetControl";
 
 export interface FilterRow { op: "AND" | "OR"; query: string; }
 
@@ -117,7 +118,12 @@ export class CCFilterRows {
             op.value = row.op;
             setTooltip(op, "AND: both must match. OR: either one.");
             op.addEventListener("change", () => { row.op = op.value as "AND" | "OR"; this.apply(); });
+            onMiddleClickReset(op, () => {
+                op.value = row.op = "AND";
+                this.apply();
+            });
             const text = new TextComponent(line).setPlaceholder("Enter query…").setValue(row.query);
+            resetValue(text, "");
             text.inputEl.addClass("graphview-cc-nf-input");
             text.onChange(debounce((v: string) => { if (v !== row.query) { row.query = v; this.apply(); } }, 400, true));
             new CCQuerySuggest(this.view.app, text.inputEl, () => { /* commit on input event */ });

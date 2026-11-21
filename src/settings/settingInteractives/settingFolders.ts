@@ -1,3 +1,5 @@
+import { resetValue } from "../resetControl";
+import { DEFAULT_SETTINGS } from "../settings";
 import { Setting, TFile } from "obsidian";
 import { ExtendedGraphSettingTab, FOLDER_KEY, ExtendedGraphInstances, SettingInteractives, t } from "../../internal";
 
@@ -18,7 +20,7 @@ export class SettingFolders extends SettingInteractives {
             .setName(t("features.folderShowFullPath"))
             .setDesc(t("features.folderShowFullPathDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.folderShowFullPath)
+                cb.setValue(ExtendedGraphInstances.settings.folderShowFullPath).then(control => resetValue(control, DEFAULT_SETTINGS.folderShowFullPath))
                     .onChange(async (value) => {
                         ExtendedGraphInstances.settings.folderShowFullPath = value;
                         await ExtendedGraphInstances.plugin.saveSettings();

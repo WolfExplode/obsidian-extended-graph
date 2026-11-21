@@ -12,6 +12,8 @@ import {
 } from "../../internal";
 
 import { egShow } from "../../cc/ccExtendedGraphPanel"; // [CC]
+import { onMiddleClickReset } from "../../settings/resetControl";
+import { DEFAULT_SETTINGS } from "../../settings/settings";
 
 export class GCOptions extends GCSection {
     suggester: RendererNodeNamesSuggester;
@@ -186,6 +188,7 @@ export class GCOptions extends GCSection {
         ];
         const setting = new Setting(this.treeItemChildren)
             .setName(t("inputs.selectionMode"));
+        onMiddleClickReset(setting.settingEl, () => this.selectionModeButtons[DEFAULT_SETTINGS.selectionMode]?.extraSettingsEl.click());
 
         for (const mode of modes) {
             setting.addExtraButton(cb => {

@@ -1,3 +1,5 @@
+import { onMiddleClickReset, resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, FilesSuggester, ExtendedGraphInstances, SettingsSection, t, UIElements } from "../internal";
 
@@ -19,7 +21,7 @@ export class SettingFilter extends SettingsSection {
             .setName(t("features.ignoreInlineLinks"))
             .setDesc(t("features.ignoreInlineLinksDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.ignoreInlineLinks);
+                cb.setValue(ExtendedGraphInstances.settings.ignoreInlineLinks).then(control => resetValue(control, DEFAULT_SETTINGS.ignoreInlineLinks));
                 cb.onChange(async (value) => {
                     ExtendedGraphInstances.settings.ignoreInlineLinks = value;
                     await ExtendedGraphInstances.plugin.saveSettings();
@@ -31,6 +33,12 @@ export class SettingFilter extends SettingsSection {
         const setting = new Setting(this.settingTab.containerEl).setName(t("query.excludeRegex"));
         setting.addExtraButton(cb => {
             UIElements.setupExtraButton(cb, 'add');
+            onMiddleClickReset(cb.extraSettingsEl, () => {
+                ExtendedGraphInstances.settings.filterAbstractFiles = structuredClone(DEFAULT_SETTINGS.filterAbstractFiles);
+                for (const row of this.elementsBody.splice(this.elementsBody.indexOf(setting.settingEl) + 1)) row.remove();
+                for (const filter of ExtendedGraphInstances.settings.filterAbstractFiles) this.addRegex(filter);
+                void ExtendedGraphInstances.plugin.saveSettings();
+            });
             cb.onClick(async () => {
                 const lastDiv = this.elementsBody.last() ?? setting.settingEl;
                 const newFilter = { regex: "", flag: "" };
@@ -51,7 +59,7 @@ export class SettingFilter extends SettingsSection {
                     filter.regex = value;
                     ExtendedGraphInstances.plugin.saveSettings();
                 });
-                search.setValue(filter.regex);
+                search.setValue(filter.regex).then(control => resetValue(control, ""));
                 search.onChange((value) => {
                     filter.regex = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -59,7 +67,7 @@ export class SettingFilter extends SettingsSection {
             })
             .addText(cb => {
                 cb.setPlaceholder("flag")
-                    .setValue(filter.flag)
+                    .setValue(filter.flag).then(control => resetValue(control, ""))
                     .onChange((value) => {
                         filter.flag = value;
                         ExtendedGraphInstances.plugin.saveSettings();

@@ -4,6 +4,7 @@
  *  - the same margin at the bottom of the panel as at the top.
  */
 import { setTooltip, ToggleComponent } from "obsidian";
+import { resetValue } from "../settings/resetControl";
 
 export interface HeaderToggle {
     set(value: boolean): void;          // update without firing onChange
@@ -18,7 +19,7 @@ export function addHeaderToggle(sectionRoot: HTMLElement, tooltip: string, initi
     ["click", "mousedown", "pointerdown"].forEach(ev => holder.addEventListener(ev, e => e.stopPropagation()));
     setTooltip(holder, tooltip, { placement: "left" });
     let syncing = false;
-    const toggle = new ToggleComponent(holder).setValue(initial).onChange(v => {
+    const toggle = new ToggleComponent(holder).setValue(initial).then(control => resetValue(control, false)).onChange(v => {
         if (!syncing) onChange(v);
     });
     return {

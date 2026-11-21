@@ -12,6 +12,7 @@ import { ExtraButtonComponent } from "obsidian";
 import { CCLogger } from "./ccLogger";
 import { CCSettings } from "./ccSettings";
 import type { EGSettingsView } from "./ccTypes";
+import { onMiddleClickReset } from "../settings/resetControl";
 
 /** Section id -> feature keys in settings.enableFeatures (used for the "with features ON" counter). */
 const SECTION_FEATURES: Record<string, string[]> = {
@@ -77,6 +78,9 @@ export class CCCompact {
             .setIcon("pin")
             .onClick(() => void this.togglePin(id));
         pin.extraSettingsEl.addClass("graphview-cc-pin");
+        onMiddleClickReset(pin.extraSettingsEl, () => {
+            if (this.isPinned(id)) void this.togglePin(id);
+        });
         this.groups.push({ id, title, pin });
         this.refreshPin(id);
     }

@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Modifier, Platform, Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSection, t } from "../internal";
 
@@ -28,7 +30,7 @@ export class SettingInput extends SettingsSection {
                     'Shift': 'Shift',
                     'Alt': 'Alt'
                 });
-                cb.setValue(ExtendedGraphInstances.settings.useRadialMenu ? ExtendedGraphInstances.settings.radialMenuModifier : '');
+                cb.setValue(ExtendedGraphInstances.settings.useRadialMenu ? ExtendedGraphInstances.settings.radialMenuModifier : '').then(control => resetValue(control, DEFAULT_SETTINGS.useRadialMenu ? DEFAULT_SETTINGS.radialMenuModifier : ''));
                 cb.onChange(async (value) => {
                     if (value === '') {
                         ExtendedGraphInstances.settings.useRadialMenu = false;
@@ -58,7 +60,7 @@ export class SettingInput extends SettingsSection {
                     'Shift': 'Shift',
                     'Alt': 'Alt'
                 });
-                cb.setValue(ExtendedGraphInstances.settings.pinNodeModifier ? ExtendedGraphInstances.settings.pinNodeModifier : '');
+                cb.setValue(ExtendedGraphInstances.settings.pinNodeModifier ? ExtendedGraphInstances.settings.pinNodeModifier : '').then(control => resetValue(control, DEFAULT_SETTINGS.pinNodeModifier ? DEFAULT_SETTINGS.pinNodeModifier : ''));
                 cb.onChange(async (value) => {
                     if (value === '') {
                         ExtendedGraphInstances.settings.pinNodeModifier = undefined;
@@ -86,7 +88,7 @@ export class SettingInput extends SettingsSection {
                     'Shift': 'Shift',
                     'Alt': 'Alt'
                 });
-                cb.setValue(ExtendedGraphInstances.settings.selectNodeModifier);
+                cb.setValue(ExtendedGraphInstances.settings.selectNodeModifier).then(control => resetValue(control, DEFAULT_SETTINGS.selectNodeModifier));
                 cb.onChange(async (value) => {
                     ExtendedGraphInstances.settings.selectNodeModifier = value as Modifier;
                     await ExtendedGraphInstances.plugin.saveSettings();

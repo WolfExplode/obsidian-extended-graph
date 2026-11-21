@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSectionPerGraphType, t } from "../internal";
 
@@ -19,7 +21,7 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             .setName(t("features.arrowsInvert"))
             .setDesc(t("features.arrowsInvertDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.invertArrows);
+                cb.setValue(ExtendedGraphInstances.settings.invertArrows).then(control => resetValue(control, DEFAULT_SETTINGS.invertArrows));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.invertArrows = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -32,7 +34,7 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             .setName(t("features.arrowsFlat"))
             .setDesc(t("features.arrowsFlatDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.flatArrows);
+                cb.setValue(ExtendedGraphInstances.settings.flatArrows).then(control => resetValue(control, DEFAULT_SETTINGS.flatArrows));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.flatArrows = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -46,7 +48,7 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             .setDesc(t("features.arrowsOpaqueDesc"))
             .addToggle(cb => {
                 cb.toggleEl.insertAdjacentText('beforebegin', t("features.arrowsOpaqueKeepFading"));
-                cb.setValue(ExtendedGraphInstances.settings.opaqueArrowsButKeepFading);
+                cb.setValue(ExtendedGraphInstances.settings.opaqueArrowsButKeepFading).then(control => resetValue(control, DEFAULT_SETTINGS.opaqueArrowsButKeepFading));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.opaqueArrowsButKeepFading = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -54,7 +56,7 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             })
             .addToggle(cb => {
                 cb.toggleEl.insertAdjacentText('beforebegin', t("features.arrowsOpaqueAlways"));
-                cb.setValue(ExtendedGraphInstances.settings.alwaysOpaqueArrows);
+                cb.setValue(ExtendedGraphInstances.settings.alwaysOpaqueArrows).then(control => resetValue(control, DEFAULT_SETTINGS.alwaysOpaqueArrows));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.alwaysOpaqueArrows = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -68,7 +70,7 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             .setDesc(t("features.arrowsScaleDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.arrowScale.toString())
+                cb.setValue(ExtendedGraphInstances.settings.arrowScale.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.arrowScale.toString()))
                     .onChange(async (value) => {
                         if (value === '') {
                             ExtendedGraphInstances.settings.arrowScale = 1;
@@ -87,7 +89,7 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             .setName(t("features.arrowsFixedSize"))
             .setDesc(t("features.arrowsFixedSizeDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.arrowFixedSize);
+                cb.setValue(ExtendedGraphInstances.settings.arrowFixedSize).then(control => resetValue(control, DEFAULT_SETTINGS.arrowFixedSize));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.arrowFixedSize = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -100,14 +102,14 @@ export class SettingArrows extends SettingsSectionPerGraphType {
             .setName(t("features.arrowsColor"))
             .setDesc(t("features.arrowsColorDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.arrowColorBool);
+                cb.setValue(ExtendedGraphInstances.settings.arrowColorBool).then(control => resetValue(control, DEFAULT_SETTINGS.arrowColorBool));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.arrowColorBool = value;
                     ExtendedGraphInstances.plugin.saveSettings();
                 })
             })
             .addColorPicker(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.arrowColor);
+                cb.setValue(ExtendedGraphInstances.settings.arrowColor).then(control => resetValue(control, DEFAULT_SETTINGS.arrowColor));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.arrowColor = value;
                     ExtendedGraphInstances.plugin.saveSettings();

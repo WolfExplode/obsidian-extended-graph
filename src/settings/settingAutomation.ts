@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, FeatureSetting, ExtendedGraphInstances, SettingsSection, t } from "../internal";
 
@@ -33,7 +35,7 @@ export class SettingAutomation extends SettingsSection {
                 cb.addOptions(Object.fromEntries(Object.values(ExtendedGraphInstances.settings.states).map(data => {
                     return [data.id, data.name]
                 })));
-                cb.setValue(ExtendedGraphInstances.settings.startingStateID);
+                cb.setValue(ExtendedGraphInstances.settings.startingStateID).then(control => resetValue(control, DEFAULT_SETTINGS.startingStateID));
                 cb.onChange(id => {
                     ExtendedGraphInstances.settings.startingStateID = id;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -47,7 +49,7 @@ export class SettingAutomation extends SettingsSection {
             .setName(t("states.syncDefaultState"))
             .setDesc(t("states.syncDefaultStateDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.syncDefaultState);
+                cb.setValue(ExtendedGraphInstances.settings.syncDefaultState).then(control => resetValue(control, DEFAULT_SETTINGS.syncDefaultState));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.syncDefaultState = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -61,7 +63,7 @@ export class SettingAutomation extends SettingsSection {
             .setName(t("states.saveConfigsWithState"))
             .setDesc(t("states.saveConfigsWithStateDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.saveConfigsWithState);
+                cb.setValue(ExtendedGraphInstances.settings.saveConfigsWithState).then(control => resetValue(control, DEFAULT_SETTINGS.saveConfigsWithState));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.saveConfigsWithState = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -75,7 +77,7 @@ export class SettingAutomation extends SettingsSection {
             .setName(t("features.openInNewTab"))
             .setDesc(t("features.openInNewTabDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.openInNewTab);
+                cb.setValue(ExtendedGraphInstances.settings.openInNewTab).then(control => resetValue(control, DEFAULT_SETTINGS.openInNewTab));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.openInNewTab = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -89,7 +91,7 @@ export class SettingAutomation extends SettingsSection {
             .setName(t("features.autoReset"))
             .setDesc(t("features.autoResetDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.resetAfterChanges);
+                cb.setValue(ExtendedGraphInstances.settings.resetAfterChanges).then(control => resetValue(control, DEFAULT_SETTINGS.resetAfterChanges));
                 cb.onChange((value) => {
                     ExtendedGraphInstances.settings.resetAfterChanges = value;
                     ExtendedGraphInstances.plugin.saveSettings();

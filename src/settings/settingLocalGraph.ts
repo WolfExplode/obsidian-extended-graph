@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { ExtraButtonComponent, Setting } from "obsidian";
 import { ExtendedGraphSettingTab, getCMapData, NodeShape, ExtendedGraphInstances, SettingColorPalette, SettingsSection, ShapeEnum, t } from "../internal";
 
@@ -22,7 +24,7 @@ export class SettingLocal extends SettingsSection {
             .setName(t("features.colorBasedOnDepth"))
             .setDesc(t("features.colorBasedOnDepthDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.colorBasedOnDepth)
+                cb.setValue(ExtendedGraphInstances.settings.colorBasedOnDepth).then(control => resetValue(control, DEFAULT_SETTINGS.colorBasedOnDepth))
                     .onChange(async (value) => {
                         ExtendedGraphInstances.settings.colorBasedOnDepth = value;
                         ExtendedGraphInstances.plugin.saveSettings();
@@ -30,7 +32,7 @@ export class SettingLocal extends SettingsSection {
                     })
             }).settingEl);
 
-        this.depthColormapSetting = new SettingColorPalette(this.containerEl, this.settingTab, 'depth-color')
+        this.depthColormapSetting = new SettingColorPalette(this.containerEl, this.settingTab, 'depth-color', DEFAULT_SETTINGS.depthColormap)
             .setName(t("features.depthPalette"))
             .setDesc(t("features.depthPaletteDesc"));
 
@@ -52,14 +54,14 @@ export class SettingLocal extends SettingsSection {
             .setName(t("features.localGraphCurrentNodeColor"))
             .setDesc(t("features.localGraphCurrentNodeColorDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.currentNode.useColor);
+                cb.setValue(ExtendedGraphInstances.settings.currentNode.useColor).then(control => resetValue(control, DEFAULT_SETTINGS.currentNode.useColor));
                 cb.onChange(async (value) => {
                     ExtendedGraphInstances.settings.currentNode.useColor = value;
                     await ExtendedGraphInstances.plugin.saveSettings();
                 })
             })
             .addColorPicker(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.currentNode.color);
+                cb.setValue(ExtendedGraphInstances.settings.currentNode.color).then(control => resetValue(control, DEFAULT_SETTINGS.currentNode.color));
                 cb.onChange(async (hex: string) => {
                     ExtendedGraphInstances.settings.currentNode.color = hex;
                     await ExtendedGraphInstances.plugin.saveSettings();
@@ -73,7 +75,7 @@ export class SettingLocal extends SettingsSection {
             .setDesc(t("features.localGraphCurrentNodeSizeDesc"))
             .addText(cb => {
                 cb.inputEl.addClass("number");
-                cb.setValue(ExtendedGraphInstances.settings.currentNode.size.toString());
+                cb.setValue(ExtendedGraphInstances.settings.currentNode.size.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.currentNode.size.toString()));
                 cb.onChange(async (value) => {
                     const intValue = parseInt(value);
                     if (!isNaN(intValue)) {

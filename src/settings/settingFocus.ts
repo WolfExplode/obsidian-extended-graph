@@ -1,3 +1,5 @@
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 import { Setting } from "obsidian";
 import { ExtendedGraphSettingTab, ExtendedGraphInstances, SettingsSectionPerGraphType, t } from "../internal";
 
@@ -23,7 +25,7 @@ export class SettingFocus extends SettingsSectionPerGraphType {
                 .setDesc(t("features.focusScaleDesc"))
                 .addText(cb => {
                     cb.inputEl.addClass("number");
-                    cb.setValue(ExtendedGraphInstances.settings.focusScaleFactor.toString())
+                    cb.setValue(ExtendedGraphInstances.settings.focusScaleFactor.toString()).then(control => resetValue(control, DEFAULT_SETTINGS.focusScaleFactor.toString()))
                         .onChange(async (value) => {
                             const n = parseFloat(value);
                             if (n) {
@@ -41,7 +43,7 @@ export class SettingFocus extends SettingsSectionPerGraphType {
                 .setName(t("features.focusOpenNodes"))
                 .setDesc(t("features.focusOpenNodesDesc"))
                 .addToggle(cb => {
-                    cb.setValue(ExtendedGraphInstances.settings.highlightOpenNodes)
+                    cb.setValue(ExtendedGraphInstances.settings.highlightOpenNodes).then(control => resetValue(control, DEFAULT_SETTINGS.highlightOpenNodes))
                         .onChange(async (value) => {
                             ExtendedGraphInstances.settings.highlightOpenNodes = value;
                             await ExtendedGraphInstances.plugin.saveSettings();
@@ -56,7 +58,7 @@ export class SettingFocus extends SettingsSectionPerGraphType {
                 .setName(t("features.focusSearchResults"))
                 .setDesc(t("features.focusSearchResultsDesc"))
                 .addToggle(cb => {
-                    cb.setValue(ExtendedGraphInstances.settings.highlightSearchResults)
+                    cb.setValue(ExtendedGraphInstances.settings.highlightSearchResults).then(control => resetValue(control, DEFAULT_SETTINGS.highlightSearchResults))
                         .onChange(async (value) => {
                             ExtendedGraphInstances.settings.highlightSearchResults = value;
                             await ExtendedGraphInstances.plugin.saveSettings();

@@ -1,3 +1,5 @@
+import { resetValue } from "../resetControl";
+import { DEFAULT_SETTINGS } from "../settings";
 import { ButtonComponent, Notice, Setting } from "obsidian";
 import {
     ExtendedGraphSettingTab,
@@ -154,7 +156,7 @@ export class SettingProperty extends SettingInteractives {
             .setName(t("features.interactives.arcsAdd"))
             .setDesc(t("features.interactives.arcsAddPropertyDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].showOnGraph);
+                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].showOnGraph).then(control => resetValue(control, (DEFAULT_SETTINGS.interactiveSettings[this.interactiveKey]?.showOnGraph ?? true)));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].showOnGraph = value;
                     ExtendedGraphInstances.plugin.saveSettings();
@@ -166,7 +168,7 @@ export class SettingProperty extends SettingInteractives {
             .setName(t("features.interactives.useForNodeColor"))
             .setDesc(t("features.interactives.useForNodeColorDesc"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].useForNodeColor ?? false);
+                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].useForNodeColor ?? false).then(control => resetValue(control, DEFAULT_SETTINGS.interactiveSettings[this.interactiveKey]?.useForNodeColor ?? false));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.interactiveSettings[this.interactiveKey].useForNodeColor = value;
                     ExtendedGraphInstances.plugin.saveSettings();

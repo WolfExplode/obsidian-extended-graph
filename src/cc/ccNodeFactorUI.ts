@@ -5,15 +5,19 @@
  * Layout is built for a narrow panel: one full-width row per control,
  * label + (?) help icon on top, control below. No long descriptions: help is in the tooltips.
  */
-import { App, Component, debounce, Plugin, setIcon, setTooltip, SliderComponent, TextComponent } from "obsidian";
+import { App, Component, debounce, DropdownComponent, Plugin, setIcon, setTooltip, SliderComponent, TextComponent } from "obsidian";
 import { GraphView, LocalGraphView } from "obsidian-typings";
-import { CCNodeFactor, formulaText, NodeFactorSettings, rowsText } from "./ccNodeFactor";
+import { CCNodeFactor, formulaText, NODEFACTOR_DEFAULTS, NodeFactorSettings, rowsText } from "./ccNodeFactor";
 import { CCSettings } from "./ccSettings";
 import { CCQuery } from "./ccQuery";
 import { CCQuerySuggest } from "./ccQuerySuggest";
 import { addHeaderToggle, equalizePanelMargins, HeaderToggle } from "./ccPanel";
 import { CCLogger } from "./ccLogger";
 import { ExtendedGraphInstances } from "../internal";
+import { t } from "../globalVariables";
+import type { GraphType } from "../types/restrictedStrings";
+import { DEFAULT_SETTINGS } from "../settings/settings";
+import { onMiddleClickReset, resetValue } from "../settings/resetControl";
 
 type NumKey = "a" | "b" | "contrast" | "base" | "min" | "max";
 type QueryKey = "appliesTo" | "queryX" | "queryY";
@@ -34,13 +38,13 @@ function coloredText(parent: HTMLElement, text: string): void {
 }
 
 const HELP = {
-    enable: "NodeFactor on/off. OFF = Obsidian's native node sizes.",
+    enable: "Turn Node Weight sizing on or off for both weight sources.",
     appliesTo: "Which nodes (notes) get resized.",
     queryX: "X = number of linked notes matching these queries (e.g. books, reflections: -file:=).",
     a: "a = weight of X. 0 = X ignored.",
     queryY: "Y = number of linked notes matching these queries (e.g. other themes: file:=).",
     b: "b = weight of Y. 0 = Y ignored.",
-    base: "Size of a node with no links.",
+    base: "Size of a node with zero weight.",
     contrast: "c = contrast between nodes. 0 = all equal, 0.5 = square root, 1 = linear (strong hierarchy).",
     name: "Your own name for this variable (click to rename). Display only.",
     min: "Smallest allowed node size.",
@@ -49,8 +53,11 @@ const HELP = {
 
 const EQUATION_LABEL = "NodeWeight = (a·X + b·Y)·c";
 
-function equationHelp(s: NodeFactorSettings): string {
+function equationHelp(s: NodeFactorSettings, descendants: boolean): string {
     const f = (n: number) => Number(n.toFixed(2)).toString();
+    if (descendants) {
+        return `Size = ${f(s.base)} × (1 + descendant count)^${f(s.contrast)}, bounded between ${f(s.min)} and ${f(s.max)}.`;
+    }
     return "Displayed is the simplified equation to determine node weight. Here is the accurate one:\n" +
         `size = base × (1 + a·X + b·Y)^c, bounded between min and max\n` +
         `now: size = ${f(s.base)} × (1 + ${f(s.a)}·X + ${f(s.b)}·Y)^${f(s.contrast)}, bounded between ${f(s.min)} and ${f(s.max)}\n` +
@@ -86,10 +93,12 @@ export class CCNodeFactorSection extends Component {
     private equationHelpEl: HTMLElement | null = null;
     private headToggle: HeaderToggle;
     private app: App;
+    private graphType: GraphType;
 
     constructor(view: GraphView | LocalGraphView) {
         super();
         this.app = view.app;
+        this.graphType = view.getViewType() === "graph" ? "graph" : "localgraph";
         const controls = view.contentEl.querySelector(".graph-controls") as HTMLElement;
         controls.querySelectorAll(".mod-graphview-cc-nodefactor").forEach(el => el.remove()); // stale copy from a previous load
         CCNodeFactorSection.live.add(this);
@@ -142,6 +151,10 @@ export class CCNodeFactorSection extends Component {
 
     // ================================ DISPLAY ================================
 
+    private get usesDescendants(): boolean {
+        return ExtendedGraphInstances.settings.radialNodeSizing[this.graphType] === "descendants";
+    }
+
     private display(): void {
         const c = this.children;
         c.empty();
@@ -154,20 +167,36 @@ export class CCNodeFactorSection extends Component {
             return;
         }
 
-        // Equation: simplified label, accurate formula in the (?) tooltip (kept up to date)
-        const eq = this.row(c, EQUATION_LABEL, equationHelp(s));
+        const source = this.row(c, t("nodeWeight.source"), t("nodeWeight.sourceHelp"));
+        new DropdownComponent(source.body)
+            .addOption("default", t("nodeWeight.linkedNotes"))
+            .addOption("descendants", t("nodeWeight.descendants"))
+            .setValue(this.usesDescendants ? "descendants" : "default")
+            .then(control => resetValue(control, DEFAULT_SETTINGS.radialNodeSizing[this.graphType]))
+            .onChange(value => {
+                const { settings, plugin } = ExtendedGraphInstances;
+                const sizing = value === "descendants" ? "descendants" : "default";
+                settings.radialNodeSizing = { ...settings.radialNodeSizing, [this.graphType]: sizing };
+                void plugin.saveSettings();
+                CCNodeFactor.notify();
+            });
+
+        const eq = this.row(c, this.usesDescendants ? t("nodeWeight.descendantEquation") : EQUATION_LABEL,
+            equationHelp(s, this.usesDescendants));
         eq.head.addClass("graphview-cc-nf-equation");
         this.equationHelpEl = eq.head.querySelector<HTMLElement>(".graphview-cc-help");
 
-        this.addQuery(c, "Node to apply Weight", "appliesTo");
+        if (!this.usesDescendants) {
+            this.addQuery(c, "Node to apply Weight", "appliesTo");
 
-        this.group(c, "Variable X", HELP.queryX, "nameX");
-        this.addQuery(c, "", "queryX");
-        this.addSlider(c, "a (Weight multiplier)", "a", 0, 5, 0.1);
+            this.group(c, "Variable X", HELP.queryX, "nameX");
+            this.addQuery(c, "", "queryX");
+            this.addSlider(c, "a (Weight multiplier)", "a", 0, 5, 0.1);
 
-        this.group(c, "Variable Y", HELP.queryY, "nameY");
-        this.addQuery(c, "", "queryY");
-        this.addSlider(c, "b (Weight multiplier)", "b", 0, 5, 0.1);
+            this.group(c, "Variable Y", HELP.queryY, "nameY");
+            this.addQuery(c, "", "queryY");
+            this.addSlider(c, "b (Weight multiplier)", "b", 0, 5, 0.1);
+        }
 
         this.group(c, "Emphasis factor (c)");
         this.addSlider(c, "Node contrast (c)", "contrast", 0, 1.5, 0.05);
@@ -201,6 +230,11 @@ export class CCNodeFactorSection extends Component {
                 s[nameKey] = name.getValue().trim();
                 saveAndLog();
             });
+                onMiddleClickReset(name.inputEl, () => {
+                    name.setValue(NODEFACTOR_DEFAULTS[nameKey]);
+                    s[nameKey] = NODEFACTOR_DEFAULTS[nameKey];
+                    saveAndLog();
+                });
         }
         if (help) helpIcon(g, help);
     }
@@ -212,6 +246,7 @@ export class CCNodeFactorSection extends Component {
         wrap.addClass("graphview-cc-nf-rows");
         const rows = s[key];
         if (rows.length === 0) rows.push("");
+        let reset = false;
 
         const commitAll = () => {
             const clean = rows.map(r => r.trim());
@@ -224,6 +259,12 @@ export class CCNodeFactorSection extends Component {
             rows.forEach((value, idx) => {
                 const line = wrap.createDiv({ cls: "graphview-cc-nf-qrow" });
                 const text = new TextComponent(line).setPlaceholder("Enter query…").setValue(value);
+                onMiddleClickReset(text.inputEl, () => {
+                    reset = true;
+                    s[key] = [...NODEFACTOR_DEFAULTS[key]];
+                    this.changed(`${key} reset`);
+                    this.display();
+                });
                 text.inputEl.addClass("graphview-cc-nf-input");
                 let last = value;
                 const validate = (v: string) => {
@@ -234,6 +275,7 @@ export class CCNodeFactorSection extends Component {
                 };
                 validate(value);
                 const commit = debounce((v: string) => {
+                    if (reset) return;
                     if (v === last) return;              // focus re-dispatch: nothing changed
                     if (!validate(v)) return;
                     last = v;
@@ -261,7 +303,8 @@ export class CCNodeFactorSection extends Component {
     private addSlider(c: HTMLElement, label: string, key: NumKey, min: number, max: number, step: number): void {
         const s = CCNodeFactor.settings;
         const { body } = this.row(c, label, HELP[key], true);
-        const slider = new SliderComponent(body).setLimits(min, max, step).setValue(s[key]).setDynamicTooltip().onChange(v => {
+        const slider = new SliderComponent(body).setLimits(min, max, step).setValue(s[key])
+            .then(control => resetValue(control, NODEFACTOR_DEFAULTS[key])).setDynamicTooltip().onChange(v => {
             s[key] = v;
             this.changed(`${key}=${v}`);
         });
@@ -270,7 +313,7 @@ export class CCNodeFactorSection extends Component {
 
     private changed(reason: string): void {
         CCNodeFactor.invalidate(reason);
-        if (this.equationHelpEl) setTooltip(this.equationHelpEl, equationHelp(CCNodeFactor.settings), { placement: "left" });
+        if (this.equationHelpEl) setTooltip(this.equationHelpEl, equationHelp(CCNodeFactor.settings, this.usesDescendants), { placement: "left" });
         saveAndLog();
         redrawGraphs();
     }

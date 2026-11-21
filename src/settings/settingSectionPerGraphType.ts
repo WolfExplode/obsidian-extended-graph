@@ -1,5 +1,7 @@
 import { ToggleComponent } from "obsidian";
 import { ExtendedGraphSettingTab, Feature, GraphType, graphTypeLabels, makeCompatibleForClass, ExtendedGraphInstances, SettingsSection } from "../internal";
+import { resetValue } from "./resetControl";
+import { DEFAULT_SETTINGS } from "./settings";
 
 
 export abstract class SettingsSectionPerGraphType extends SettingsSection {
@@ -33,6 +35,7 @@ export abstract class SettingsSectionPerGraphType extends SettingsSection {
         toggle.insertAdjacentText("afterbegin", graphTypeLabels[graphType])
         new ToggleComponent(toggle)
             .setValue(enable)
+            .then(control => resetValue(control, this.feature === "property-key" || DEFAULT_SETTINGS.enableFeatures[graphType][this.feature]))
             .onChange(value => {
                 this.toggle(graphType, value);
             });

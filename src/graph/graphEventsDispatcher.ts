@@ -332,6 +332,7 @@ export class GraphEventsDispatcher extends Component {
                     const data = updateData(args[0] as GraphData);
                     if (data) {
                         args[0] = data;
+                        instances.nodesSet.invalidateHoverDistances();
                         const res = Reflect.apply(target, thisArg, args);
 
                         instances.radialLayout.apply();
@@ -728,6 +729,7 @@ export class GraphEventsDispatcher extends Component {
     // ============================== GRAPH CYCLE ==============================
 
     private beforeDestroyGraphics() {
+        this.instances.nodesSet.invalidateHoverDistances();
         this.instances.cssBridge.unload();
         this.unbindStageEvents();
         this.inputsManager.unbindStageEvents();

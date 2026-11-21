@@ -145,15 +145,6 @@ export abstract class ExtendedGraphNode extends ExtendedGraphElement<GraphNode> 
     }
 
     private proxyRender(): void {
-        if (!(
-            (this.instances.settings.enableFeatures[this.instances.type]['names'] && this.instances.settings.showNamesWhenNeighborHighlighted)
-            || this.icon
-            || (this.graphicsWrapper && this.graphicsWrapper.shape !== ShapeEnum.CIRCLE)
-            || (this.instances.type === "graph" && this.instances.settings.enableFeatures["graph"].focus && this.instances.settings.focusScaleFactor !== 1)
-        )) {
-            return;
-        }
-
         const onRenderCalled = this.onRenderCalled.bind(this);
         ExtendedGraphInstances.proxysManager.registerProxy<typeof this.coreElement.render>(
             this.coreElement,
@@ -271,10 +262,7 @@ export abstract class ExtendedGraphNode extends ExtendedGraphElement<GraphNode> 
     }
 
     private onRenderCalled() {
-        // Display names if the neighbor is highligted
-        if (this.instances.settings.enableFeatures[this.instances.type]['names'] && this.instances.settings.showNamesWhenNeighborHighlighted) {
-            this.extendedText.makeVisibleIfNeighborHighlighted();
-        }
+        this.extendedText.applyHoverOpacity();
 
         if (this.coreElement.circle) {
             // Make the circle same color as the background
@@ -340,7 +328,7 @@ export abstract class ExtendedGraphNode extends ExtendedGraphElement<GraphNode> 
     getSizeWithoutScaling(): number {
         const customRadiusFactor = this.radius / NodeShape.RADIUS;
         const node = this.coreElement;
-        const ccSize = CCNodeFactor.sizeFor(this.id); // [CC]
+        const ccSize = CCNodeFactor.sizeFor(this.id, this.instances.radialLayout.getDescendantCount(this.id)); // [CC]
         if (ccSize !== undefined) return node.renderer.fNodeSizeMult * ccSize * customRadiusFactor; // [CC]
         if (this.instances.settings.enableFeatures[this.instances.type]['elements-stats'] && this.instances.settings.nodesSizeFunction !== 'default') {
             const originalSize = node.renderer.fNodeSizeMult * 8;

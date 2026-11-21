@@ -1,5 +1,6 @@
 import { Modal, Setting } from "obsidian";
 import { ExtendedGraphInstances, t } from "../../internal";
+import { onMiddleClickReset, resetValue } from "../../settings/resetControl";
 
 export class InteractivesSelectionModal extends Modal {
     key: string;
@@ -28,12 +29,14 @@ export class InteractivesSelectionModal extends Modal {
         this.regexSetting = new Setting(this.contentEl)
             .setName(t("query.excludeRegex"))
             .addTextArea(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.key].excludeRegex.regex);
+                cb.setValue(ExtendedGraphInstances.settings.interactiveSettings[this.key].excludeRegex.regex)
+                    .then(control => resetValue(control, ""));
                 cb.onChange((value) => this.changeExcludeRegex(value, ExtendedGraphInstances.settings.interactiveSettings[this.key].excludeRegex.flags));
             })
             .addText(cb => {
                 cb.setPlaceholder("flags")
                     .setValue(ExtendedGraphInstances.settings.interactiveSettings[this.key].excludeRegex.flags)
+                    .then(control => resetValue(control, ""))
                     .onChange((value) => this.changeExcludeRegex(ExtendedGraphInstances.settings.interactiveSettings[this.key].excludeRegex.regex, value));
             });
         this.updateRegexDesc();
@@ -50,6 +53,7 @@ export class InteractivesSelectionModal extends Modal {
             toggle.addEventListener("change", e => {
                 toggle.checked ? this.selectInteractive(label, toggle) : this.deselectInteractive(label, toggle);
             });
+            onMiddleClickReset(label, () => this.selectInteractive(label, toggle));
             this.labels[type] = label;
         }
     }

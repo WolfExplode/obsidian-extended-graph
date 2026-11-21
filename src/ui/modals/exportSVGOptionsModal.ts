@@ -1,3 +1,5 @@
+import { resetValue, onMiddleClickReset } from "../../settings/resetControl";
+import { DEFAULT_SETTINGS } from "../../settings/settings";
 import { Modal, Setting } from "obsidian";
 import { GraphInstances, ExtendedGraphInstances, t } from "../../internal";
 
@@ -29,7 +31,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName(t("features.svgScreenshotVisibleArea"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.onlyVisibleArea);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.onlyVisibleArea)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.onlyVisibleArea));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.onlyVisibleArea = value;
                     this.saveSettings();
@@ -41,7 +44,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName(t("features.svgScreenshotNodeNames"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showNodeNames);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showNodeNames)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.showNodeNames));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.showNodeNames = value;
                     this.saveSettings();
@@ -71,7 +75,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName(t("features.svgScreenshotCurvedLinks"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useCurvedLinks);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useCurvedLinks)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.useCurvedLinks));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.useCurvedLinks = value;
                     this.saveSettings();
@@ -92,7 +97,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName("Show modified arrows")
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useModifiedArrows);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useModifiedArrows)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.useModifiedArrows));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.useModifiedArrows = value;
                     this.saveSettings();
@@ -113,7 +119,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName(t("features.svgScreenshotNodeShapes"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useNodesShapes);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useNodesShapes)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.useNodesShapes));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.useNodesShapes = value;
                     this.saveSettings();
@@ -134,7 +141,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName(t("features.svgScreenshotArcs"))
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showArcs);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showArcs)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.showArcs));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.showArcs = value;
                     this.saveSettings();
@@ -158,7 +166,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName("Show folder boxes")
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showFolders);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showFolders)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.showFolders));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.showFolders = value;
                     this.saveSettings();
@@ -179,7 +188,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName("Show modified names")
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useModifiedNames);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.useModifiedNames)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.useModifiedNames));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.useModifiedNames = value;
                     this.saveSettings();
@@ -200,7 +210,8 @@ export class ExportSVGOptionModal extends Modal {
         new Setting(this.contentEl)
             .setName("Show icons")
             .addToggle(cb => {
-                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showIcons);
+                cb.setValue(ExtendedGraphInstances.settings.exportSVGOptions.showIcons)
+                    .then(control => resetValue(control, DEFAULT_SETTINGS.exportSVGOptions.showIcons));
                 cb.onChange(value => {
                     ExtendedGraphInstances.settings.exportSVGOptions.showIcons = value;
                     this.saveSettings();
@@ -219,6 +230,10 @@ export class ExportSVGOptionModal extends Modal {
         const setting = new Setting(this.contentEl)
             .addButton(cb => {
                 cb.setButtonText(t("features.svgScreenshotCopyCode"));
+                onMiddleClickReset(cb.buttonEl, () => {
+                    ExtendedGraphInstances.settings.exportSVGOptions.asImage = DEFAULT_SETTINGS.exportSVGOptions.asImage;
+                    this.saveSettings();
+                });
                 cb.onClick(() => {
                     this.isCanceled = false;
                     ExtendedGraphInstances.settings.exportSVGOptions.asImage = false;
@@ -229,6 +244,10 @@ export class ExportSVGOptionModal extends Modal {
         if (ClipboardItem.supports("image/svg+xml")) {
             setting.addButton(cb => {
                 cb.setButtonText(t("features.svgScreenshotCopyImage"));
+                onMiddleClickReset(cb.buttonEl, () => {
+                    ExtendedGraphInstances.settings.exportSVGOptions.asImage = DEFAULT_SETTINGS.exportSVGOptions.asImage;
+                    this.saveSettings();
+                });
                 cb.setCta();
                 cb.onClick(() => {
                     this.isCanceled = false;
